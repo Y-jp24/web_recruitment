@@ -225,7 +225,7 @@ export function ApplyForm({
         )}
       </button>
       <p className="text-center text-xs text-slate-400">
-        ＊ は必須項目です。送信後に専用URLで状況をご確認いただけます。
+        ＊ は必須項目です。
       </p>
     </form>
   );
