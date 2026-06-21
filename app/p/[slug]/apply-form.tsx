@@ -137,6 +137,7 @@ export function ApplyForm({
   }, []);
 
   const errors = state.errors ?? {};
+  const values = state.values ?? {};
 
   return (
     <form action={formAction} className="flex flex-col gap-6">
@@ -179,7 +180,11 @@ export function ApplyForm({
                 <p className="text-xs text-slate-500">{field.help}</p>
               )}
               <div id={fid}>
-                <FieldControl field={field} error={err} />
+                <FieldControl
+                  field={field}
+                  error={err}
+                  defaultValue={values[field.name]}
+                />
               </div>
               {err && (
                 <p className="flex items-center gap-1 text-xs text-red-600">
