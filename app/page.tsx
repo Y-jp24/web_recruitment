@@ -9,11 +9,8 @@ export default function Home() {
           <ClipboardList className="h-6 w-6 text-accent-600" />
         </div>
         <h1 className="mt-5 text-xl font-bold tracking-tight text-slate-900">
-          採用応募 + 面談予約フォーム
+          面談管理システム
         </h1>
-        <p className="mt-3 text-sm leading-relaxed text-slate-500">
-          ご応募は、お送りしたURLからお願いします。
-        </p>
 
         <div className="mt-6 flex items-center justify-center">
           <Badge variant="accent">オープンソース (MIT)</Badge>

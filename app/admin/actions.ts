@@ -256,7 +256,13 @@ export async function addField(formData: FormData): Promise<void> {
   revalidatePath(`/admin/postings/${postingId}`);
 }
 
-export async function updateField(formData: FormData): Promise<void> {
+export type FieldSaveState = { savedAt: number };
+
+/** 項目の保存（useActionState 用。保存時刻を返してUIにフィードバックする） */
+export async function updateField(
+  _prev: FieldSaveState,
+  formData: FormData,
+): Promise<FieldSaveState> {
   await assertAdmin();
   const id = formData.get("id") as string;
   const postingId = formData.get("postingId") as string;
@@ -275,7 +281,7 @@ export async function updateField(formData: FormData): Promise<void> {
         .map((o) => o.trim())
         .filter(Boolean)
     : null;
-  if (!id) return;
+  if (!id) return { savedAt: 0 };
 
   // name（回答キー）は内部用のため UI から変更しない
   await db
@@ -293,6 +299,7 @@ export async function updateField(formData: FormData): Promise<void> {
     })
     .where(eq(postingFields.id, id));
   if (postingId) revalidatePath(`/admin/postings/${postingId}`);
+  return { savedAt: Date.now() };
 }
 
 export async function deleteField(formData: FormData): Promise<void> {

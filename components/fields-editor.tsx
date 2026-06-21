@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { GripVertical, Trash2 } from "lucide-react";
+import { useActionState, useState, useTransition } from "react";
+import { GripVertical, Trash2, Check } from "lucide-react";
 import type { PostingFieldRow } from "@/lib/db/schema";
 import { FIELD_TYPES } from "@/lib/postings";
 import { buttonClass } from "@/components/ui";
@@ -33,6 +33,7 @@ function FieldCard({
 }) {
   const postingId = field.postingId;
   const showOptions = field.type === "select" || field.type === "radio";
+  const [saveState, saveAction] = useActionState(updateField, { savedAt: 0 });
 
   return (
     <div
@@ -69,7 +70,7 @@ function FieldCard({
         </form>
       </div>
 
-      <form action={updateField} className="flex flex-col gap-3">
+      <form action={saveAction} className="flex flex-col gap-3">
         <input type="hidden" name="id" value={field.id} />
         <input type="hidden" name="postingId" value={postingId} />
 
@@ -152,7 +153,19 @@ function FieldCard({
             />
             一覧のタイトルとして使う
           </label>
-          <SubmitButton className={buttonClass("secondary", "sm", "ml-auto")}>
+          {saveState.savedAt > 0 && (
+            <span className="ml-auto flex items-center gap-1 text-xs font-medium text-emerald-600">
+              <Check className="h-3.5 w-3.5" />
+              保存しました
+            </span>
+          )}
+          <SubmitButton
+            className={buttonClass(
+              "secondary",
+              "sm",
+              saveState.savedAt > 0 ? "" : "ml-auto",
+            )}
+          >
             保存
           </SubmitButton>
         </div>
@@ -173,8 +186,22 @@ export function FieldsEditor({
   const [overId, setOverId] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
-  // サーバ側の並び/件数が変わったら同期（保存・追加・削除・並び替え確定後）
-  const serverKey = fields.map((f) => f.id).join(",");
+  // サーバ側の内容/並び/件数が変わったら同期（保存・追加・削除・並び替え確定後）。
+  // 内容も含めることで、保存後に defaultValue が最新へ更新される。
+  const serverKey = JSON.stringify(
+    fields.map((f) => [
+      f.id,
+      f.label,
+      f.type,
+      f.required,
+      f.minLength,
+      f.options,
+      f.placeholder,
+      f.help,
+      f.isName,
+      f.sortOrder,
+    ]),
+  );
   const [prevKey, setPrevKey] = useState(serverKey);
   if (prevKey !== serverKey) {
     setPrevKey(serverKey);

@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
-import { CalendarClock, Clock, Info } from "lucide-react";
+import { CalendarClock, Info } from "lucide-react";
 import { getApplicationByToken } from "@/lib/applications";
 import { getPostingBySlug } from "@/lib/postings-db";
 import { formatSlotRange } from "@/lib/datetime";
-import { Container, Card, Badge, SentenceLines } from "@/components/ui";
+import { Container, Card } from "@/components/ui";
 import { MeetingLink } from "@/components/meeting-link";
 
 export const dynamic = "force-dynamic";
@@ -23,38 +23,21 @@ export default async function StatusPage({
   return (
     <Container className="py-14">
       <Card className="p-8">
-        <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-          選考状況
-        </p>
-        <h1 className="mt-1 text-lg font-bold text-slate-900">
+        <h1 className="text-lg font-bold text-slate-900">
           {posting?.title ?? "ご応募"}
         </h1>
 
         {declined ? (
-          <div className="mt-6">
-            <Badge variant="neutral">選考終了</Badge>
-            <SentenceLines
-              text="この度はご応募いただき、誠にありがとうございました。慎重に検討させていただきました結果、今回はご縁を見送らせていただくことになりました。貴重なお時間をいただきましたこと、心より感謝申し上げます。"
-              className="mt-4 text-sm leading-relaxed text-slate-600"
-            />
-          </div>
+          <p className="mt-5 text-sm leading-relaxed text-slate-600">
+            応募内容を鑑みて、今回は見送りとなりました。
+          </p>
         ) : (
-          <div className="mt-6">
-            <Badge variant="accent">
-              <Clock className="h-3.5 w-3.5" />
-              選考中
-            </Badge>
-            <SentenceLines
-              text="応募を受け付けています。面談の可否はこのページに反映されます。必ずしも個別にご連絡するとは限りませんので、ときどきご確認ください。"
-              className="mt-4 text-sm leading-relaxed text-slate-600"
-            />
-
+          <div className="mt-5">
             {app.slot && (
-              <div className="mt-5 flex items-center gap-2 rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-700">
+              <div className="flex items-center gap-2 rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-700">
                 <CalendarClock className="h-4 w-4 text-accent-600" />
                 <span>
-                  面談希望日時：
-                  {formatSlotRange(app.slot.startAt, app.slot.endAt)}
+                  面談日時：{formatSlotRange(app.slot.startAt, app.slot.endAt)}
                 </span>
               </div>
             )}
