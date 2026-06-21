@@ -17,6 +17,8 @@ export type ApplyState = {
   ok: boolean;
   errors?: Record<string, string>;
   formError?: string;
+  // エラー時に入力値を返してフォームへ復元する（React 19 の自動リセット対策）
+  values?: Record<string, string>;
 };
 
 function isUniqueViolation(e: unknown): boolean {
@@ -55,7 +57,7 @@ export async function submitApplication(
   }
 
   if (Object.keys(errors).length > 0) {
-    return { ok: false, errors };
+    return { ok: false, errors, values: answers };
   }
 
   // 2) 応募者の識別（Cookie 優先、なければ localStorage 由来の hidden 値）
@@ -92,6 +94,7 @@ export async function submitApplication(
           slot_id:
             "申し訳ありません。その枠はちょうど埋まりました。別の枠を選んでください。",
         },
+        values: answers,
       };
     }
     throw e;

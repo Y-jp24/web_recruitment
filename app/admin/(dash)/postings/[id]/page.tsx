@@ -8,6 +8,7 @@ import {
   ChevronUp,
   ChevronDown,
   GripVertical,
+  RotateCcw,
 } from "lucide-react";
 import { getPostingRowsById } from "@/lib/postings-db";
 import { getOrigin } from "@/lib/applications";
@@ -18,6 +19,7 @@ import { ConfirmSubmit } from "@/components/confirm-submit";
 import { SubmitButton } from "@/components/submit-button";
 import {
   updatePostingMeta,
+  resetAfterApplyMessage,
   deletePosting,
   addField,
   updateField,
@@ -269,9 +271,21 @@ export default async function PostingEditor({
               placeholder={DEFAULT_AFTER_APPLY_MESSAGE}
               className={inputClass}
             />
-            <p className="text-xs text-slate-400">
-              未入力の場合は既定の案内文が表示されます。
-            </p>
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs text-slate-400">
+                未入力の場合は既定の案内文が表示されます。
+              </p>
+              {posting.afterApplyMessage && (
+                // 既定文（未設定）に戻す。フォーム内だが formAction で専用アクションへ送る。
+                <SubmitButton
+                  formAction={resetAfterApplyMessage}
+                  className={buttonClass("ghost", "sm")}
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  既定に戻す
+                </SubmitButton>
+              )}
+            </div>
           </div>
           <div className="flex items-center justify-between">
             <SubmitButton className={buttonClass("primary", "md")}>

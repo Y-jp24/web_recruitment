@@ -18,9 +18,11 @@ const inputBase =
 function FieldControl({
   field,
   error,
+  defaultValue,
 }: {
   field: Field;
   error?: string;
+  defaultValue?: string;
 }) {
   const borderClass = error ? "border-red-300" : "border-slate-300";
   const common = cn(inputBase, borderClass);
@@ -31,6 +33,7 @@ function FieldControl({
         name={field.name}
         rows={5}
         placeholder={field.placeholder}
+        defaultValue={defaultValue}
         className={cn(common, "resize-y leading-relaxed")}
       />
     );
@@ -38,7 +41,11 @@ function FieldControl({
 
   if (field.type === "select") {
     return (
-      <select name={field.name} className={common} defaultValue="">
+      <select
+        name={field.name}
+        className={common}
+        defaultValue={defaultValue ?? ""}
+      >
         <option value="" disabled>
           選択してください
         </option>
@@ -63,6 +70,7 @@ function FieldControl({
               type="radio"
               name={field.name}
               value={o}
+              defaultChecked={defaultValue === o}
               className="h-4 w-4 accent-accent-600"
             />
             <span>{o}</span>
@@ -86,6 +94,7 @@ function FieldControl({
       type={inputType}
       name={field.name}
       placeholder={field.placeholder}
+      defaultValue={defaultValue}
       className={common}
     />
   );

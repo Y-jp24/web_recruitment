@@ -212,6 +212,21 @@ export async function updatePostingMeta(formData: FormData): Promise<void> {
   revalidatePath(`/admin/postings/${id}`);
 }
 
+/** 応募完了後の案内文を既定文（未設定）に戻す */
+export async function resetAfterApplyMessage(
+  formData: FormData,
+): Promise<void> {
+  await assertAdmin();
+  const id = formData.get("id") as string;
+  if (!id) return;
+  // null に戻すと表示側で DEFAULT_AFTER_APPLY_MESSAGE にフォールバックする
+  await db
+    .update(postings)
+    .set({ afterApplyMessage: null })
+    .where(eq(postings.id, id));
+  revalidatePath(`/admin/postings/${id}`);
+}
+
 export async function deletePosting(formData: FormData): Promise<void> {
   await assertAdmin();
   const id = formData.get("id") as string;
