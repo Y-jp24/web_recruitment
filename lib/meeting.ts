@@ -11,9 +11,6 @@ import { customAlphabet } from "nanoid";
 // Jitsi の公開サーバー。将来セルフホストへ切り替える場合はここだけ変更する。
 const JITSI_BASE_URL = "https://meet.jit.si";
 
-// 部屋名のプレフィックス（用途が分かるように）。
-const ROOM_PREFIX = "saiyo-";
-
 // 部屋名のランダム部分の長さ。推測困難にするため十分に長くとる。
 const ROOM_ID_LENGTH = 24;
 
@@ -27,8 +24,6 @@ const roomId = customAlphabet(
  * 推測困難なユニーク部屋名を持つ Jitsi 面談URLを生成して返す。
  */
 export function generateMeetingUrl(): string {
-  const room = `${ROOM_PREFIX}${roomId()}`;
-  const url = `${JITSI_BASE_URL}/${room}`;
-  console.log(`[meeting] 面談URLを発行しました: ${url}`);
+  const url = `${JITSI_BASE_URL}/${roomId()}`;
   return url;
 }
