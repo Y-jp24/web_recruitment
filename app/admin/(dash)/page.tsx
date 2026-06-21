@@ -7,9 +7,10 @@ import {
   RotateCcw,
   ShieldX,
   ExternalLink,
+  Search,
 } from "lucide-react";
 import { listApplications, type AppRow } from "@/lib/admin-queries";
-import type { Posting } from "@/lib/postings";
+import { fallbackTitle, type Posting } from "@/lib/postings";
 import { getPostingsMap, listPostingRows } from "@/lib/postings-db";
 import { formatSlotRange, formatDate, formatTime } from "@/lib/datetime";
 import { Card, Badge, buttonClass } from "@/components/ui";
@@ -21,7 +22,6 @@ import {
   saveNote,
   blockApplicationClient,
 } from "../actions";
-import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -37,30 +37,6 @@ function statusBadge(status: string) {
     return <Badge variant="danger">自動却下</Badge>;
   if (status === "rejected") return <Badge variant="neutral">却下</Badge>;
   return <Badge variant="accent">選考中</Badge>;
-}
-
-function FilterTab({
-  active,
-  href,
-  children,
-}: {
-  active: boolean;
-  href: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <Link
-      href={href}
-      className={cn(
-        "rounded-full px-3.5 py-1.5 text-sm font-medium transition",
-        active
-          ? "bg-slate-900 text-white"
-          : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50",
-      )}
-    >
-      {children}
-    </Link>
-  );
 }
 
 function ApplicationItem({
@@ -81,7 +57,7 @@ function ApplicationItem({
         <div>
           <div className="flex items-center gap-2">
             <h3 className="font-semibold text-slate-900">
-              {app.displayName || "（無名）"}
+              {app.displayName || fallbackTitle(app.id)}
             </h3>
             {statusBadge(app.status)}
             {app.warnedTerms && app.warnedTerms.length > 0 && (
@@ -209,61 +185,78 @@ function ApplicationItem({
 export default async function AdminApplicationsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ posting?: string; status?: string }>;
+  searchParams: Promise<{ posting?: string; status?: string; q?: string }>;
 }) {
   const sp = await searchParams;
   const posting = sp.posting ?? "";
   const status = sp.status ?? "";
+  const q = (sp.q ?? "").trim();
 
   const apps = await listApplications({
     posting: posting || undefined,
     status: status || undefined,
+    q: q || undefined,
   });
   const postingList = await listPostingRows();
   const postingsMap = await getPostingsMap();
 
-  const makeHref = (next: { posting?: string; status?: string }) => {
-    const p = next.posting ?? posting;
-    const s = next.status ?? status;
-    const params = new URLSearchParams();
-    if (p) params.set("posting", p);
-    if (s) params.set("status", s);
-    const q = params.toString();
-    return q ? `/admin?${q}` : "/admin";
-  };
+  const selectClass =
+    "rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500";
 
   return (
     <div>
       <h1 className="text-xl font-bold text-slate-900">応募一覧</h1>
 
-      {/* 案件フィルタ */}
-      <div className="mt-4 flex flex-wrap gap-2">
-        <FilterTab active={!posting} href={makeHref({ posting: "" })}>
-          全案件
-        </FilterTab>
-        {postingList.map((p) => (
-          <FilterTab
-            key={p.slug}
-            active={posting === p.slug}
-            href={makeHref({ posting: p.slug })}
-          >
-            {p.title}
-          </FilterTab>
-        ))}
-      </div>
-
-      {/* ステータスフィルタ */}
-      <div className="mt-2 flex flex-wrap gap-2">
-        {STATUS_TABS.map((t) => (
-          <FilterTab
-            key={t.key}
-            active={status === t.key}
-            href={makeHref({ status: t.key })}
-          >
-            {t.label}
-          </FilterTab>
-        ))}
-      </div>
+      {/* フィルタ（GET フォーム） */}
+      <form method="get" className="mt-4 flex flex-wrap items-end gap-2">
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-slate-500">募集</label>
+          <select name="posting" defaultValue={posting} className={selectClass}>
+            <option value="">全案件</option>
+            {postingList.map((p) => (
+              <option key={p.slug} value={p.slug}>
+                {p.title}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-slate-500">状態</label>
+          <select name="status" defaultValue={status} className={selectClass}>
+            {STATUS_TABS.map((t) => (
+              <option key={t.key} value={t.key}>
+                {t.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex flex-1 flex-col gap-1">
+          <label className="text-xs font-medium text-slate-500">
+            検索（メモ・回答内容・氏名など）
+          </label>
+          <div className="flex items-center gap-2">
+            <input
+              type="search"
+              name="q"
+              defaultValue={q}
+              placeholder="キーワード"
+              className={`${selectClass} min-w-0 flex-1`}
+            />
+            <button className={buttonClass("primary", "md")}>
+              <Search className="h-4 w-4" />
+              絞り込む
+            </button>
+            {(posting || status || q) && (
+              <Link
+                href="/admin"
+                className={buttonClass("ghost", "md")}
+              >
+                クリア
+              </Link>
+            )}
+          </div>
+        </div>
+      </form>
 
       <p className="mt-4 text-sm text-slate-500">{apps.length} 件</p>
 

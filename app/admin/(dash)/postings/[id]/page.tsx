@@ -82,25 +82,13 @@ function FieldEditor({ field }: { field: PostingFieldRow }) {
         <input type="hidden" name="id" value={field.id} />
         <input type="hidden" name="postingId" value={postingId} />
 
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="flex flex-col gap-1">
-            <label className={labelClass}>ラベル（表示名）</label>
-            <input
-              name="label"
-              defaultValue={field.label}
-              className={inputClass}
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className={labelClass}>
-              データ名（英数字・回答のキー）
-            </label>
-            <input
-              name="name"
-              defaultValue={field.name}
-              className={`${inputClass} font-mono`}
-            />
-          </div>
+        <div className="flex flex-col gap-1">
+          <label className={labelClass}>ラベル（表示名）</label>
+          <input
+            name="label"
+            defaultValue={field.label}
+            className={inputClass}
+          />
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
@@ -177,7 +165,7 @@ function FieldEditor({ field }: { field: PostingFieldRow }) {
               defaultChecked={field.isName}
               className="h-4 w-4 accent-accent-600"
             />
-            氏名として一覧に表示
+            一覧のタイトルとして使う
           </label>
           <button className={buttonClass("secondary", "sm", "ml-auto")}>
             保存

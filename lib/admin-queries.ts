@@ -9,17 +9,30 @@ import {
   type BlockTerm,
   type BlockedClient,
 } from "@/lib/db/schema";
-import { and, desc, eq, asc, sql } from "drizzle-orm";
+import { and, desc, eq, asc, or, ilike, sql } from "drizzle-orm";
 
 export type AppRow = Application & { slot: Slot | null };
 
 export async function listApplications(filter: {
   posting?: string;
   status?: string;
+  q?: string;
 }): Promise<AppRow[]> {
   const conds = [];
   if (filter.posting) conds.push(eq(applications.postingSlug, filter.posting));
   if (filter.status) conds.push(eq(applications.status, filter.status));
+  if (filter.q) {
+    const like = `%${filter.q}%`;
+    // メモ・タイトル・回答全文（JSONB）・自動却下理由を横断検索
+    conds.push(
+      or(
+        ilike(applications.note, like),
+        ilike(applications.displayName, like),
+        ilike(applications.autoReason, like),
+        ilike(sql`${applications.answers}::text`, like),
+      )!,
+    );
+  }
 
   const rows = await db
     .select()

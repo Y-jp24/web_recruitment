@@ -47,15 +47,23 @@ export type Posting = {
   fields: Field[];
 };
 
-/** 応募回答から一覧表示用の氏名を取り出す */
+/**
+ * 応募回答から一覧タイトル用の文字列を取り出す。
+ * 「一覧のタイトルとして使う」項目があればその回答、なければ先頭項目の回答。
+ * 何も無ければ空文字（呼び出し側で応募IDなどにフォールバック）。
+ */
 export function pickDisplayName(
   posting: Pick<Posting, "fields">,
   answers: Record<string, string>,
 ): string {
-  const nameField =
-    posting.fields.find((f) => f.isName) ??
-    posting.fields.find((f) => f.type === "text");
-  return (nameField && answers[nameField.name]?.trim()) || "（無名）";
+  const titleField =
+    posting.fields.find((f) => f.isName) ?? posting.fields[0];
+  return (titleField && answers[titleField.name]?.trim()) || "";
+}
+
+/** 応募IDから短いフォールバック見出しを作る */
+export function fallbackTitle(id: string): string {
+  return `応募 ${id.slice(0, 8)}`;
 }
 
 /** 初期投入用のサンプル案件（npm run db:seed） */

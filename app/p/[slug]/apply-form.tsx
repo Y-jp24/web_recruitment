@@ -207,7 +207,7 @@ export function ApplyForm({
             送信中…
           </>
         ) : (
-          "この内容で応募する"
+          "この内容で送信する"
         )}
       </button>
       <p className="text-center text-xs text-slate-400">

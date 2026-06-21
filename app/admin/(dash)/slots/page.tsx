@@ -1,5 +1,6 @@
 import { listSlots } from "@/lib/admin-queries";
 import { getPostingsMap } from "@/lib/postings-db";
+import { fallbackTitle } from "@/lib/postings";
 import { formatTime, jstDateKey, todayJstKey } from "@/lib/datetime";
 import { AdminSlots, type AdminSlotData } from "@/components/admin-slots";
 import { addSlots, deleteSlot, deleteSlotsForDay } from "../../actions";
@@ -16,7 +17,7 @@ export default async function SlotsPage() {
     startMs: s.startAt.getTime(),
     booked: !!s.bookedBy,
     bookedLabel: s.bookedBy
-      ? `${s.bookedBy.displayName ?? "予約あり"}（${
+      ? `${s.bookedBy.displayName || fallbackTitle(s.bookedBy.id)}（${
           postingsMap[s.bookedBy.postingSlug]?.title ?? s.bookedBy.postingSlug
         }）`
       : null,

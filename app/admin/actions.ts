@@ -225,9 +225,10 @@ export async function addField(formData: FormData): Promise<void> {
     .from(postingFields)
     .where(eq(postingFields.postingId, postingId));
   const sortOrder = (maxRow[0]?.max ?? 0) + 1;
+  // データ名（回答キー）は内部用に自動生成して安定させる（UIには出さない）
   await db.insert(postingFields).values({
     postingId,
-    name: `field_${sortOrder}`,
+    name: `f_${crypto.randomUUID().slice(0, 8)}`,
     label: "新しい項目",
     type: "text",
     required: false,
@@ -241,9 +242,6 @@ export async function updateField(formData: FormData): Promise<void> {
   const id = formData.get("id") as string;
   const postingId = formData.get("postingId") as string;
   const label = ((formData.get("label") as string | null) ?? "").trim();
-  const name = normalizeFieldName(
-    (formData.get("name") as string | null) ?? "",
-  );
   const type = (formData.get("type") as string | null) ?? "text";
   const required = formData.get("required") === "on";
   const isName = formData.get("isName") === "on";
@@ -260,11 +258,11 @@ export async function updateField(formData: FormData): Promise<void> {
     : null;
   if (!id) return;
 
+  // name（回答キー）は内部用のため UI から変更しない
   await db
     .update(postingFields)
     .set({
       label: label || "（無題）",
-      name: name || "field",
       type,
       required,
       isName,
@@ -314,14 +312,6 @@ export async function moveField(formData: FormData): Promise<void> {
     .set({ sortOrder: a.sortOrder })
     .where(eq(postingFields.id, b.id));
   revalidatePath(`/admin/postings/${postingId}`);
-}
-
-function normalizeFieldName(s: string): string {
-  return s
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9_]+/g, "_")
-    .replace(/^_+|_+$/g, "");
 }
 
 // --- ブロック/注意ワード ---
