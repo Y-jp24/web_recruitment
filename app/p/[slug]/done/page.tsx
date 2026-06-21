@@ -6,6 +6,7 @@ import { getPostingBySlug } from "@/lib/postings-db";
 import { formatSlotRange } from "@/lib/datetime";
 import { Container, Card } from "@/components/ui";
 import { MeetingLink } from "@/components/meeting-link";
+import { CopyButton } from "@/components/copy-button";
 
 export const dynamic = "force-dynamic";
 
@@ -59,12 +60,15 @@ export default async function DonePage({
             <Link2 className="h-4 w-4 text-accent-600" />
             状況確認用URL（変更・ご連絡はこちらに反映されます）
           </div>
-          <Link
-            href={`/a/${token}`}
-            className="mt-2.5 block break-all rounded-lg bg-slate-50 px-3 py-2 font-mono text-xs text-accent-700 hover:bg-slate-100"
-          >
-            {statusUrl}
-          </Link>
+          <div className="mt-2.5 flex items-stretch gap-2">
+            <Link
+              href={`/a/${token}`}
+              className="flex min-w-0 flex-1 items-center break-all rounded-lg bg-slate-50 px-3 py-2 font-mono text-xs text-accent-700 hover:bg-slate-100"
+            >
+              {statusUrl}
+            </Link>
+            <CopyButton value={statusUrl} iconOnly />
+          </div>
         </div>
       </Card>
     </Container>

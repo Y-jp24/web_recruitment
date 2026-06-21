@@ -27,42 +27,28 @@ export function LoginForm({
     {},
   );
 
-  // ロック解除時刻（epoch ms）。初期値はサーバー判定、以降はアクション結果で更新。
-  const [lockedUntilMs, setLockedUntilMs] = useState<number | null>(
-    initialRetryAfterSec ? Date.now() + initialRetryAfterSec * 1000 : null,
+  // ロック残り秒数。初期値はサーバー判定。Date.now() を使わず秒数で管理する。
+  const [remainingSec, setRemainingSec] = useState<number>(
+    initialRetryAfterSec ?? 0,
   );
-  // カウントダウン表示のための現在時刻
-  const [now, setNow] = useState<number>(() => Date.now());
 
-  // アクション結果にロック情報があれば解除時刻を更新
-  useEffect(() => {
-    if (state.retryAfterSec) {
-      setLockedUntilMs(Date.now() + state.retryAfterSec * 1000);
-    }
-  }, [state]);
+  // アクション結果にロック情報があれば残り秒数を反映（render 中に前回値と比較）
+  const [seenState, setSeenState] = useState(state);
+  if (state !== seenState) {
+    setSeenState(state);
+    if (state.retryAfterSec) setRemainingSec(state.retryAfterSec);
+  }
 
-  // ロック中は1秒ごとに残り時間を更新。解除後はタイマーを止める。
-  useEffect(() => {
-    if (lockedUntilMs === null) return;
-    let id: ReturnType<typeof setInterval> | null = null;
-    const tick = () => {
-      setNow(Date.now());
-      if (Date.now() >= lockedUntilMs && id) {
-        clearInterval(id);
-        id = null;
-      }
-    };
-    tick();
-    id = setInterval(tick, 1000);
-    return () => {
-      if (id) clearInterval(id);
-    };
-  }, [lockedUntilMs]);
-
-  const remainingSec = lockedUntilMs
-    ? Math.max(0, Math.ceil((lockedUntilMs - now) / 1000))
-    : 0;
   const isLocked = remainingSec > 0;
+
+  // ロック中は1秒ごとにカウントダウン。0になったらタイマーを止める。
+  useEffect(() => {
+    if (!isLocked) return;
+    const id = setInterval(() => {
+      setRemainingSec((r) => (r <= 1 ? 0 : r - 1));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [isLocked]);
 
   // ロック中はカウントダウン付きの文言を優先表示する
   const errorText = isLocked

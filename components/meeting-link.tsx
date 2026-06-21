@@ -8,6 +8,7 @@
 
 import { Video } from "lucide-react";
 import { DEFAULT_AFTER_APPLY_MESSAGE } from "@/lib/postings";
+import { CopyButton } from "@/components/copy-button";
 
 export function MeetingLink({
   url,
@@ -28,14 +29,17 @@ export function MeetingLink({
       <p className="mt-1.5 whitespace-pre-line text-xs leading-relaxed text-slate-600">
         {text}
       </p>
-      <a
-        href={url}
-        target="_blank"
-        rel="noreferrer"
-        className="mt-2.5 block break-all rounded-lg border border-slate-200 bg-white px-3 py-2 font-mono text-xs text-accent-700 hover:bg-slate-50"
-      >
-        {url}
-      </a>
+      <div className="mt-2.5 flex items-stretch gap-2">
+        <a
+          href={url}
+          target="_blank"
+          rel="noreferrer"
+          className="flex min-w-0 flex-1 items-center break-all rounded-lg border border-slate-200 bg-white px-3 py-2 font-mono text-xs text-accent-700 hover:bg-slate-50"
+        >
+          {url}
+        </a>
+        <CopyButton value={url} iconOnly />
+      </div>
     </div>
   );
 }

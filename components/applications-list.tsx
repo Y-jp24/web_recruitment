@@ -159,13 +159,13 @@ export function ApplicationsList({ apps }: { apps: AppView[] }) {
             )}
 
             {/* 回答 */}
-            <dl className="mt-4 flex flex-col gap-2 border-t border-slate-100 pt-4 text-sm">
+            <dl className="mt-4 divide-y divide-slate-100 border-t border-slate-100 text-sm">
               {selected.answers.map((ans, i) => (
-                <div key={i} className="flex flex-col gap-0.5">
-                  <dt className="text-xs font-medium text-slate-500">
+                <div key={i} className="py-3">
+                  <dt className="text-xs font-semibold text-accent-700">
                     {ans.label}
                   </dt>
-                  <dd className="whitespace-pre-wrap break-words text-slate-800">
+                  <dd className="mt-1 whitespace-pre-wrap break-words text-slate-900">
                     {ans.value || "—"}
                   </dd>
                 </div>
