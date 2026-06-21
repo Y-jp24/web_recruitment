@@ -41,6 +41,34 @@ export function dateKey(d: Date): string {
   return dateKeyFmt.format(d);
 }
 
+// "2026-06-22" 形式（en-CA は YYYY-MM-DD）
+const ymdFmt = new Intl.DateTimeFormat("en-CA", {
+  timeZone: TZ,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+/** JST の日付キー "YYYY-MM-DD" */
+export function jstDateKey(d: Date): string {
+  return ymdFmt.format(d);
+}
+
+/** 現在の JST 日付キー */
+export function todayJstKey(): string {
+  return ymdFmt.format(new Date());
+}
+
+/** "YYYY-MM-DD" を JST 正午の Date にする（表示・整形用、TZに依存しない） */
+export function dateKeyToDate(key: string): Date {
+  return new Date(`${key}T12:00:00+09:00`);
+}
+
+/** "YYYY-MM-DD" を「6月22日(日)」のように整形 */
+export function formatDateKeyJa(key: string): string {
+  return formatDate(dateKeyToDate(key));
+}
+
 /**
  * JST の「日付 + HH:MM」を UTC の Date に変換する。
  * 管理画面で入力された枠（JST想定）を timestamptz として保存するために使う。

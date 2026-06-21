@@ -5,7 +5,13 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { and, eq, gte, inArray } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { applications, slots, blockTerms, blockedClients } from "@/lib/db/schema";
+import {
+  applications,
+  slots,
+  blockTerms,
+  blockedClients,
+  postingNotes,
+} from "@/lib/db/schema";
 import {
   ADMIN_COOKIE,
   checkPassword,
@@ -141,6 +147,23 @@ export async function blockApplicationClient(
     .set({ status: "rejected", slotId: null })
     .where(eq(applications.id, id));
   revalidatePath("/admin");
+}
+
+// --- 案件ごとの管理者メモ ---
+
+export async function savePostingNote(formData: FormData): Promise<void> {
+  await assertAdmin();
+  const slug = (formData.get("slug") as string | null) ?? "";
+  const note = ((formData.get("note") as string | null) ?? "").trim();
+  if (!slug) return;
+  await db
+    .insert(postingNotes)
+    .values({ slug, note })
+    .onConflictDoUpdate({
+      target: postingNotes.slug,
+      set: { note, updatedAt: new Date() },
+    });
+  revalidatePath("/admin/postings");
 }
 
 // --- ブロック/注意ワード ---

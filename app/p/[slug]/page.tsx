@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { getPosting } from "@/lib/postings";
 import { getAvailableSlots } from "@/lib/slots";
-import { formatSlotRange } from "@/lib/datetime";
+import { formatTime, jstDateKey, todayJstKey } from "@/lib/datetime";
 import { Container, Card, SentenceLines } from "@/components/ui";
 import { ApplyForm } from "./apply-form";
 import { submitApplication } from "./actions";
@@ -33,9 +33,11 @@ export default async function ApplyPage({
   }
 
   const slots = await getAvailableSlots();
-  const slotOptions = slots.map((s) => ({
+  const slotData = slots.map((s) => ({
     id: s.id,
-    label: formatSlotRange(s.startAt, s.endAt),
+    jstDate: jstDateKey(s.startAt),
+    timeLabel: `${formatTime(s.startAt)}〜${formatTime(s.endAt)}`,
+    sortKey: s.startAt.getTime(),
   }));
 
   const boundAction = submitApplication.bind(null, slug);
@@ -57,7 +59,8 @@ export default async function ApplyPage({
       <Card className="p-6 sm:p-8">
         <ApplyForm
           fields={posting.fields}
-          slots={slotOptions}
+          slots={slotData}
+          todayJst={todayJstKey()}
           action={boundAction}
         />
       </Card>

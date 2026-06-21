@@ -1,14 +1,16 @@
-import { Megaphone, FileText } from "lucide-react";
+import { Megaphone, FileText, StickyNote } from "lucide-react";
 import { postings } from "@/lib/postings";
-import { countByPosting } from "@/lib/admin-queries";
+import { countByPosting, getPostingNotes } from "@/lib/admin-queries";
 import { getOrigin } from "@/lib/applications";
-import { Card, Badge } from "@/components/ui";
+import { Card, Badge, buttonClass } from "@/components/ui";
 import { CopyButton } from "@/components/copy-button";
+import { savePostingNote } from "../../actions";
 
 export const dynamic = "force-dynamic";
 
 export default async function PostingsPage() {
   const counts = await countByPosting();
+  const notes = await getPostingNotes();
   const origin = await getOrigin();
 
   return (
@@ -52,6 +54,31 @@ export default async function PostingsPage() {
                   <CopyButton value={url} label="URLをコピー" />
                 </div>
               </div>
+
+              {/* 管理者用メモ（応募者には非表示） */}
+              <form
+                action={savePostingNote}
+                className="mt-4 flex flex-col gap-2 border-t border-slate-100 pt-4"
+              >
+                <input type="hidden" name="slug" value={p.slug} />
+                <label className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                  <StickyNote className="h-3.5 w-3.5" />
+                  管理メモ（応募者には表示されません）
+                </label>
+                <textarea
+                  name="note"
+                  rows={2}
+                  defaultValue={notes[p.slug] ?? ""}
+                  placeholder="例: クラウドワークスの募集URL https://crowdworks.jp/public/jobs/xxxxxxx"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
+                />
+                <button
+                  type="submit"
+                  className={buttonClass("secondary", "sm", "self-start")}
+                >
+                  メモを保存
+                </button>
+              </form>
             </Card>
           );
         })}

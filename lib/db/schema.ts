@@ -95,6 +95,18 @@ export const loginAttempts = pgTable("login_attempts", {
   lastFailedAt: timestamp("last_failed_at", { withTimezone: true }),
 });
 
+/**
+ * 案件ごとの管理者用メモ（応募者には非表示）。
+ * 例: クラウドワークスの募集URL など。slug をキーにする。
+ */
+export const postingNotes = pgTable("posting_notes", {
+  slug: text("slug").primaryKey(),
+  note: text("note").notNull().default(""),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 export type Application = typeof applications.$inferSelect;
 export type Slot = typeof slots.$inferSelect;
 export type BlockTerm = typeof blockTerms.$inferSelect;

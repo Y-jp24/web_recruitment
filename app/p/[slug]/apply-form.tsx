@@ -6,9 +6,8 @@ import type { Field } from "@/lib/postings";
 import { CLIENT_ID_FIELD } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { buttonClass } from "@/components/ui";
+import { SlotPicker, type SlotData } from "@/components/slot-picker";
 import type { ApplyState } from "./actions";
-
-type SlotOption = { id: string; label: string };
 
 const LS_KEY = "rcid";
 
@@ -95,10 +94,12 @@ function FieldControl({
 export function ApplyForm({
   fields,
   slots,
+  todayJst,
   action,
 }: {
   fields: Field[];
-  slots: SlotOption[];
+  slots: SlotData[];
+  todayJst: string;
   action: (prev: ApplyState, formData: FormData) => Promise<ApplyState>;
 }) {
   const [state, formAction, isPending] = useActionState<ApplyState, FormData>(
@@ -181,36 +182,13 @@ export function ApplyForm({
       <div className="flex flex-col gap-2.5">
         <div className="flex items-center gap-2 text-sm font-medium text-slate-800">
           <CalendarClock className="h-4 w-4 text-accent-600" />
-          面談希望の枠<span className="text-red-500">*</span>
+          面談希望の日時<span className="text-red-500">*</span>
         </div>
-        {slots.length === 0 ? (
-          <p className="rounded-xl bg-slate-100 px-4 py-3 text-sm text-slate-500">
-            現在、予約可能な枠がありません。しばらくしてから再度お試しください。
-          </p>
-        ) : (
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {slots.map((s) => (
-              <label
-                key={s.id}
-                className="group flex cursor-pointer items-center gap-2.5 rounded-xl border border-slate-200 px-3.5 py-3 text-sm transition hover:border-accent-300 hover:bg-accent-50 has-[:checked]:border-accent-500 has-[:checked]:bg-accent-50 has-[:checked]:ring-1 has-[:checked]:ring-accent-500"
-              >
-                <input
-                  type="radio"
-                  name="slot_id"
-                  value={s.id}
-                  className="h-4 w-4 accent-accent-600"
-                />
-                <span className="text-slate-800">{s.label}</span>
-              </label>
-            ))}
-          </div>
-        )}
-        {errors["slot_id"] && (
-          <p className="flex items-center gap-1 text-xs text-red-600">
-            <AlertCircle className="h-3.5 w-3.5" />
-            {errors["slot_id"]}
-          </p>
-        )}
+        <SlotPicker
+          slots={slots}
+          todayJst={todayJst}
+          error={errors["slot_id"]}
+        />
       </div>
 
       <button
