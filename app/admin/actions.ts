@@ -3,7 +3,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { and, eq, gte, lt, inArray, asc, sql } from "drizzle-orm";
+import { and, eq, gte, lt, inArray, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
   applications,
@@ -303,33 +303,26 @@ export async function deleteField(formData: FormData): Promise<void> {
   if (postingId) revalidatePath(`/admin/postings/${postingId}`);
 }
 
-export async function moveField(formData: FormData): Promise<void> {
+/** ドラッグ&ドロップ後の並び順を保存（orderedIds の順に sortOrder を振り直す） */
+export async function reorderFields(
+  postingId: string,
+  orderedIds: string[],
+): Promise<void> {
   await assertAdmin();
-  const id = formData.get("id") as string;
-  const postingId = formData.get("postingId") as string;
-  const dir = formData.get("dir") as string; // "up" | "down"
-  if (!id || !postingId) return;
-
-  const fields = await db
-    .select()
-    .from(postingFields)
-    .where(eq(postingFields.postingId, postingId))
-    .orderBy(asc(postingFields.sortOrder));
-  const idx = fields.findIndex((f) => f.id === id);
-  if (idx < 0) return;
-  const swapWith = dir === "up" ? idx - 1 : idx + 1;
-  if (swapWith < 0 || swapWith >= fields.length) return;
-
-  const a = fields[idx];
-  const b = fields[swapWith];
-  await db
-    .update(postingFields)
-    .set({ sortOrder: b.sortOrder })
-    .where(eq(postingFields.id, a.id));
-  await db
-    .update(postingFields)
-    .set({ sortOrder: a.sortOrder })
-    .where(eq(postingFields.id, b.id));
+  if (!postingId || !Array.isArray(orderedIds) || orderedIds.length === 0) {
+    return;
+  }
+  for (let i = 0; i < orderedIds.length; i++) {
+    await db
+      .update(postingFields)
+      .set({ sortOrder: i + 1 })
+      .where(
+        and(
+          eq(postingFields.id, orderedIds[i]),
+          eq(postingFields.postingId, postingId),
+        ),
+      );
+  }
   revalidatePath(`/admin/postings/${postingId}`);
 }
 

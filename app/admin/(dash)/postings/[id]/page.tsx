@@ -1,30 +1,18 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import {
-  ArrowLeft,
-  ExternalLink,
-  Plus,
-  Trash2,
-  ChevronUp,
-  ChevronDown,
-  GripVertical,
-  RotateCcw,
-} from "lucide-react";
+import { ArrowLeft, ExternalLink, Plus, Trash2, RotateCcw } from "lucide-react";
 import { getPostingRowsById } from "@/lib/postings-db";
 import { getOrigin } from "@/lib/applications";
-import { FIELD_TYPES, DEFAULT_AFTER_APPLY_MESSAGE } from "@/lib/postings";
-import type { PostingFieldRow } from "@/lib/db/schema";
+import { DEFAULT_AFTER_APPLY_MESSAGE } from "@/lib/postings";
 import { Card, buttonClass } from "@/components/ui";
 import { ConfirmSubmit } from "@/components/confirm-submit";
 import { SubmitButton } from "@/components/submit-button";
+import { FieldsEditor } from "@/components/fields-editor";
 import {
   updatePostingMeta,
   resetAfterApplyMessage,
   deletePosting,
   addField,
-  updateField,
-  deleteField,
-  moveField,
 } from "../../../actions";
 
 export const dynamic = "force-dynamic";
@@ -32,152 +20,6 @@ export const dynamic = "force-dynamic";
 const inputClass =
   "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500";
 const labelClass = "text-xs font-medium text-slate-500";
-
-function FieldEditor({ field }: { field: PostingFieldRow }) {
-  const postingId = field.postingId;
-  const showOptions = field.type === "select" || field.type === "radio";
-
-  return (
-    <Card className="p-4">
-      {/* ヘッダ: 並び替え・削除（updateField フォームの外） */}
-      <div className="mb-3 flex items-center justify-between">
-        <span className="flex items-center gap-1.5 text-xs font-medium text-slate-400">
-          <GripVertical className="h-3.5 w-3.5" />
-          項目
-        </span>
-        <div className="flex items-center gap-1">
-          <form action={moveField}>
-            <input type="hidden" name="id" value={field.id} />
-            <input type="hidden" name="postingId" value={postingId} />
-            <input type="hidden" name="dir" value="up" />
-            <SubmitButton
-              aria-label="上へ"
-              className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"
-            >
-              <ChevronUp className="h-4 w-4" />
-            </SubmitButton>
-          </form>
-          <form action={moveField}>
-            <input type="hidden" name="id" value={field.id} />
-            <input type="hidden" name="postingId" value={postingId} />
-            <input type="hidden" name="dir" value="down" />
-            <SubmitButton
-              aria-label="下へ"
-              className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"
-            >
-              <ChevronDown className="h-4 w-4" />
-            </SubmitButton>
-          </form>
-          <form action={deleteField}>
-            <input type="hidden" name="id" value={field.id} />
-            <input type="hidden" name="postingId" value={postingId} />
-            <ConfirmSubmit
-              message="この項目を削除します。よろしいですか？"
-              className="flex h-7 w-7 items-center justify-center rounded-lg text-red-500 hover:bg-red-50"
-            >
-              <Trash2 className="h-4 w-4" />
-            </ConfirmSubmit>
-          </form>
-        </div>
-      </div>
-
-      <form action={updateField} className="flex flex-col gap-3">
-        <input type="hidden" name="id" value={field.id} />
-        <input type="hidden" name="postingId" value={postingId} />
-
-        <div className="flex flex-col gap-1">
-          <label className={labelClass}>ラベル（表示名）</label>
-          <input
-            name="label"
-            defaultValue={field.label}
-            className={inputClass}
-          />
-        </div>
-
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="flex flex-col gap-1">
-            <label className={labelClass}>種別</label>
-            <select name="type" defaultValue={field.type} className={inputClass}>
-              {FIELD_TYPES.map((t) => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className={labelClass}>最低文字数（任意）</label>
-            <input
-              name="minLength"
-              type="number"
-              min={0}
-              defaultValue={field.minLength ?? ""}
-              placeholder="例: 200"
-              className={inputClass}
-            />
-          </div>
-        </div>
-
-        {showOptions && (
-          <div className="flex flex-col gap-1">
-            <label className={labelClass}>
-              選択肢（改行またはカンマ区切り）
-            </label>
-            <textarea
-              name="options"
-              rows={3}
-              defaultValue={(field.options ?? []).join("\n")}
-              className={inputClass}
-            />
-          </div>
-        )}
-
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="flex flex-col gap-1">
-            <label className={labelClass}>プレースホルダ（任意）</label>
-            <input
-              name="placeholder"
-              defaultValue={field.placeholder ?? ""}
-              className={inputClass}
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className={labelClass}>補足説明（任意）</label>
-            <input
-              name="help"
-              defaultValue={field.help ?? ""}
-              className={inputClass}
-            />
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-4">
-          <label className="flex items-center gap-2 text-sm text-slate-700">
-            <input
-              type="checkbox"
-              name="required"
-              defaultChecked={field.required}
-              className="h-4 w-4 accent-accent-600"
-            />
-            必須
-          </label>
-          <label className="flex items-center gap-2 text-sm text-slate-700">
-            <input
-              type="checkbox"
-              name="isName"
-              defaultChecked={field.isName}
-              className="h-4 w-4 accent-accent-600"
-            />
-            一覧のタイトルとして使う
-          </label>
-          <SubmitButton className={buttonClass("secondary", "sm", "ml-auto")}>
-            保存
-          </SubmitButton>
-        </div>
-      </form>
-    </Card>
-  );
-}
 
 export default async function PostingEditor({
   params,
@@ -312,11 +154,7 @@ export default async function PostingEditor({
             項目がありません。「項目を追加」で作成してください。
           </Card>
         ) : (
-          <div className="flex flex-col gap-3">
-            {fields.map((f) => (
-              <FieldEditor key={f.id} field={f} />
-            ))}
-          </div>
+          <FieldsEditor postingId={posting.id} fields={fields} />
         )}
       </div>
 
