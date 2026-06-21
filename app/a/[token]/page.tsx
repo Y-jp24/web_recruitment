@@ -3,7 +3,7 @@ import { CalendarClock, Clock, Info } from "lucide-react";
 import { getApplicationByToken } from "@/lib/applications";
 import { getPosting } from "@/lib/postings";
 import { formatSlotRange } from "@/lib/datetime";
-import { Container, Card, Badge } from "@/components/ui";
+import { Container, Card, Badge, SentenceLines } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -32,13 +32,10 @@ export default async function StatusPage({
         {declined ? (
           <div className="mt-6">
             <Badge variant="neutral">選考終了</Badge>
-            <p className="mt-4 text-sm leading-relaxed text-slate-600">
-              この度はご応募いただき、誠にありがとうございました。
-              <br />
-              慎重に検討させていただきました結果、今回はご縁を見送らせていただくことになりました。
-              <br />
-              貴重なお時間をいただきましたこと、心より感謝申し上げます。
-            </p>
+            <SentenceLines
+              text="この度はご応募いただき、誠にありがとうございました。慎重に検討させていただきました結果、今回はご縁を見送らせていただくことになりました。貴重なお時間をいただきましたこと、心より感謝申し上げます。"
+              className="mt-4 text-sm leading-relaxed text-slate-600"
+            />
           </div>
         ) : (
           <div className="mt-6">
@@ -46,10 +43,10 @@ export default async function StatusPage({
               <Clock className="h-3.5 w-3.5" />
               選考中
             </Badge>
-            <p className="mt-4 text-sm leading-relaxed text-slate-600">
-              応募を受け付けています。面談の可否はこのページに反映されます。
-              必ずしも個別にご連絡するとは限りませんので、ときどきご確認ください。
-            </p>
+            <SentenceLines
+              text="応募を受け付けています。面談の可否はこのページに反映されます。必ずしも個別にご連絡するとは限りませんので、ときどきご確認ください。"
+              className="mt-4 text-sm leading-relaxed text-slate-600"
+            />
 
             {app.slot && (
               <div className="mt-5 flex items-center gap-2 rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-700">

@@ -79,6 +79,26 @@ export function Button({
   return <button className={buttonClass(variant, size, className)} {...props} />;
 }
 
+/** 日本語の長文を「。」ごとに改行して表示する */
+export function SentenceLines({
+  text,
+  className,
+}: {
+  text: string;
+  className?: string;
+}) {
+  const parts = text.split(/(?<=。)/).filter((s) => s.trim() !== "");
+  return (
+    <p className={className}>
+      {parts.map((s, i) => (
+        <span key={i} className="block">
+          {s}
+        </span>
+      ))}
+    </p>
+  );
+}
+
 const badgeVariants = {
   neutral: "bg-slate-100 text-slate-700 border-slate-200",
   accent: "bg-accent-50 text-accent-700 border-accent-200",

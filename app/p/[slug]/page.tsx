@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { getPosting } from "@/lib/postings";
 import { getAvailableSlots } from "@/lib/slots";
 import { formatSlotRange } from "@/lib/datetime";
-import { Container, Card } from "@/components/ui";
+import { Container, Card, SentenceLines } from "@/components/ui";
 import { ApplyForm } from "./apply-form";
 import { submitApplication } from "./actions";
 
@@ -47,9 +47,10 @@ export default async function ApplyPage({
           {posting.title}
         </h1>
         {posting.intro && (
-          <p className="mt-3 text-sm leading-relaxed text-slate-600">
-            {posting.intro}
-          </p>
+          <SentenceLines
+            text={posting.intro}
+            className="mt-3 text-sm leading-relaxed text-slate-600"
+          />
         )}
       </div>
 
