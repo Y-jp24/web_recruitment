@@ -29,7 +29,7 @@ export default async function StatusPage({
 
         {declined ? (
           <p className="mt-5 text-sm leading-relaxed text-slate-600">
-            ご応募内容を慎重に検討させていただきましたが、誠に残念ながら、今回はお見送りとさせていただくことになりました。
+            応募内容を鑑みて、今回は見送りとなりました。
           </p>
         ) : (
           <div className="mt-5">
