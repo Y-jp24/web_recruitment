@@ -1,7 +1,5 @@
-import { Code2, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { Container, Card, Badge } from "@/components/ui";
-
-const REPO_URL = "https://github.com/Y-jp24/web_recruitment";
 
 export default function Home() {
   return (
@@ -14,23 +12,11 @@ export default function Home() {
           採用応募 + 面談予約フォーム
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-slate-500">
-          指定フォーマットでの応募と面談予約をまとめて行える、
-          自己ホスト型のフォームです。
-          <br />
           ご応募は、お送りしたURLからお願いします。
         </p>
 
-        <div className="mt-6 flex items-center justify-center gap-3">
+        <div className="mt-6 flex items-center justify-center">
           <Badge variant="accent">オープンソース (MIT)</Badge>
-          <a
-            href={REPO_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
-          >
-            <Code2 className="h-3.5 w-3.5" />
-            GitHub
-          </a>
         </div>
       </Card>
     </Container>
