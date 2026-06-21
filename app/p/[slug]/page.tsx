@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getPosting } from "@/lib/postings";
+import { getPostingBySlug } from "@/lib/postings-db";
 import { getAvailableSlots } from "@/lib/slots";
 import { formatTime, jstDateKey, todayJstKey } from "@/lib/datetime";
 import { Container, Card, SentenceLines } from "@/components/ui";
@@ -14,7 +14,7 @@ export default async function ApplyPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const posting = getPosting(slug);
+  const posting = await getPostingBySlug(slug);
   if (!posting) notFound();
 
   if (!posting.active) {

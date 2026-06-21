@@ -1,5 +1,5 @@
 import { listSlots } from "@/lib/admin-queries";
-import { getPosting } from "@/lib/postings";
+import { getPostingsMap } from "@/lib/postings-db";
 import { formatTime, jstDateKey, todayJstKey } from "@/lib/datetime";
 import { AdminSlots, type AdminSlotData } from "@/components/admin-slots";
 import { addSlots, deleteSlot } from "../../actions";
@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 
 export default async function SlotsPage() {
   const slots = await listSlots();
+  const postingsMap = await getPostingsMap();
   const data: AdminSlotData[] = slots.map((s) => ({
     id: s.id,
     jstDate: jstDateKey(s.startAt),
@@ -16,7 +17,7 @@ export default async function SlotsPage() {
     booked: !!s.bookedBy,
     bookedLabel: s.bookedBy
       ? `${s.bookedBy.displayName ?? "予約あり"}（${
-          getPosting(s.bookedBy.postingSlug)?.title ?? s.bookedBy.postingSlug
+          postingsMap[s.bookedBy.postingSlug]?.title ?? s.bookedBy.postingSlug
         }）`
       : null,
   }));

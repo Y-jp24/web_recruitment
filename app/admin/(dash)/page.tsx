@@ -9,7 +9,8 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { listApplications, type AppRow } from "@/lib/admin-queries";
-import { postings, getPosting } from "@/lib/postings";
+import type { Posting } from "@/lib/postings";
+import { getPostingsMap, listPostingRows } from "@/lib/postings-db";
 import { formatSlotRange, formatDate, formatTime } from "@/lib/datetime";
 import { Card, Badge, buttonClass } from "@/components/ui";
 import { ConfirmSubmit } from "@/components/confirm-submit";
@@ -62,8 +63,13 @@ function FilterTab({
   );
 }
 
-function ApplicationItem({ app }: { app: AppRow }) {
-  const posting = getPosting(app.postingSlug);
+function ApplicationItem({
+  app,
+  posting,
+}: {
+  app: AppRow;
+  posting?: Posting;
+}) {
   const rejected = app.status === "auto_rejected" || app.status === "rejected";
   const idField = (
     <input type="hidden" name="id" value={app.id} />
@@ -213,6 +219,8 @@ export default async function AdminApplicationsPage({
     posting: posting || undefined,
     status: status || undefined,
   });
+  const postingList = await listPostingRows();
+  const postingsMap = await getPostingsMap();
 
   const makeHref = (next: { posting?: string; status?: string }) => {
     const p = next.posting ?? posting;
@@ -233,7 +241,7 @@ export default async function AdminApplicationsPage({
         <FilterTab active={!posting} href={makeHref({ posting: "" })}>
           全案件
         </FilterTab>
-        {postings.map((p) => (
+        {postingList.map((p) => (
           <FilterTab
             key={p.slug}
             active={posting === p.slug}
@@ -265,7 +273,13 @@ export default async function AdminApplicationsPage({
             該当する応募はありません。
           </Card>
         ) : (
-          apps.map((app) => <ApplicationItem key={app.id} app={app} />)
+          apps.map((app) => (
+            <ApplicationItem
+              key={app.id}
+              app={app}
+              posting={postingsMap[app.postingSlug]}
+            />
+          ))
         )}
       </div>
     </div>

@@ -5,6 +5,7 @@ import {
   timestamp,
   jsonb,
   integer,
+  boolean,
 } from "drizzle-orm/pg-core";
 
 /**
@@ -96,9 +97,44 @@ export const loginAttempts = pgTable("login_attempts", {
 });
 
 /**
- * 案件ごとの管理者用メモ（応募者には非表示）。
- * 例: クラウドワークスの募集URL など。slug をキーにする。
+ * 募集案件。管理画面から作成/編集できる。
+ * note は管理者用メモ（応募者には非表示。例: クラウドワークスの募集URL）。
  */
+export const postings = pgTable("postings", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  slug: text("slug").notNull().unique(),
+  title: text("title").notNull(),
+  active: boolean("active").notNull().default(true),
+  intro: text("intro"),
+  note: text("note"),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+/**
+ * 募集案件のフォーム項目。管理画面のフォームビルダーで編集する。
+ */
+export const postingFields = pgTable("posting_fields", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  postingId: uuid("posting_id")
+    .notNull()
+    .references(() => postings.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  label: text("label").notNull(),
+  // text | textarea | email | tel | select | radio | number
+  type: text("type").notNull().default("text"),
+  required: boolean("required").notNull().default(false),
+  minLength: integer("min_length"),
+  options: jsonb("options").$type<string[]>(),
+  placeholder: text("placeholder"),
+  help: text("help"),
+  isName: boolean("is_name").notNull().default(false),
+  sortOrder: integer("sort_order").notNull().default(0),
+});
+
+// 旧: slug キーの案件メモ。note は postings.note に統合済み（後方互換のため残置・未使用）。
 export const postingNotes = pgTable("posting_notes", {
   slug: text("slug").primaryKey(),
   note: text("note").notNull().default(""),
@@ -106,6 +142,9 @@ export const postingNotes = pgTable("posting_notes", {
     .notNull()
     .defaultNow(),
 });
+
+export type PostingRow = typeof postings.$inferSelect;
+export type PostingFieldRow = typeof postingFields.$inferSelect;
 
 export type Application = typeof applications.$inferSelect;
 export type Slot = typeof slots.$inferSelect;

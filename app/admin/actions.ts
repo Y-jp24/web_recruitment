@@ -3,14 +3,15 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { and, eq, gte, inArray } from "drizzle-orm";
+import { and, eq, gte, inArray, asc, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
   applications,
   slots,
   blockTerms,
   blockedClients,
-  postingNotes,
+  postings,
+  postingFields,
 } from "@/lib/db/schema";
 import {
   ADMIN_COOKIE,
@@ -149,21 +150,178 @@ export async function blockApplicationClient(
   revalidatePath("/admin");
 }
 
-// --- 案件ごとの管理者メモ ---
+// --- 募集案件（フォームビルダー） ---
 
-export async function savePostingNote(formData: FormData): Promise<void> {
+function normalizeSlug(s: string): string {
+  return s
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+export async function createPosting(formData: FormData): Promise<void> {
   await assertAdmin();
-  const slug = (formData.get("slug") as string | null) ?? "";
-  const note = ((formData.get("note") as string | null) ?? "").trim();
-  if (!slug) return;
-  await db
-    .insert(postingNotes)
-    .values({ slug, note })
-    .onConflictDoUpdate({
-      target: postingNotes.slug,
-      set: { note, updatedAt: new Date() },
-    });
+  const title = ((formData.get("title") as string | null) ?? "").trim();
+  const slug = normalizeSlug((formData.get("slug") as string | null) ?? "");
+  if (!title || !slug) return;
+
+  const maxRow = await db
+    .select({ max: sql<number>`coalesce(max(${postings.sortOrder}), 0)` })
+    .from(postings);
+  const sortOrder = (maxRow[0]?.max ?? 0) + 1;
+
+  let created;
+  try {
+    created = await db
+      .insert(postings)
+      .values({ slug, title, active: true, sortOrder })
+      .returning({ id: postings.id });
+  } catch {
+    // slug 重複など
+    redirect("/admin/postings?error=slug");
+  }
   revalidatePath("/admin/postings");
+  redirect(`/admin/postings/${created[0].id}`);
+}
+
+export async function updatePostingMeta(formData: FormData): Promise<void> {
+  await assertAdmin();
+  const id = formData.get("id") as string;
+  const title = ((formData.get("title") as string | null) ?? "").trim();
+  const slug = normalizeSlug((formData.get("slug") as string | null) ?? "");
+  const active = formData.get("active") === "on";
+  const intro = ((formData.get("intro") as string | null) ?? "").trim();
+  const note = ((formData.get("note") as string | null) ?? "").trim();
+  if (!id || !title || !slug) return;
+  await db
+    .update(postings)
+    .set({
+      title,
+      slug,
+      active,
+      intro: intro || null,
+      note: note || null,
+    })
+    .where(eq(postings.id, id));
+  revalidatePath("/admin/postings");
+  revalidatePath(`/admin/postings/${id}`);
+}
+
+export async function deletePosting(formData: FormData): Promise<void> {
+  await assertAdmin();
+  const id = formData.get("id") as string;
+  await db.delete(postings).where(eq(postings.id, id));
+  revalidatePath("/admin/postings");
+  redirect("/admin/postings");
+}
+
+export async function addField(formData: FormData): Promise<void> {
+  await assertAdmin();
+  const postingId = formData.get("postingId") as string;
+  if (!postingId) return;
+  const maxRow = await db
+    .select({ max: sql<number>`coalesce(max(${postingFields.sortOrder}), 0)` })
+    .from(postingFields)
+    .where(eq(postingFields.postingId, postingId));
+  const sortOrder = (maxRow[0]?.max ?? 0) + 1;
+  await db.insert(postingFields).values({
+    postingId,
+    name: `field_${sortOrder}`,
+    label: "新しい項目",
+    type: "text",
+    required: false,
+    sortOrder,
+  });
+  revalidatePath(`/admin/postings/${postingId}`);
+}
+
+export async function updateField(formData: FormData): Promise<void> {
+  await assertAdmin();
+  const id = formData.get("id") as string;
+  const postingId = formData.get("postingId") as string;
+  const label = ((formData.get("label") as string | null) ?? "").trim();
+  const name = normalizeFieldName(
+    (formData.get("name") as string | null) ?? "",
+  );
+  const type = (formData.get("type") as string | null) ?? "text";
+  const required = formData.get("required") === "on";
+  const isName = formData.get("isName") === "on";
+  const minLengthRaw = (formData.get("minLength") as string | null) ?? "";
+  const minLength = minLengthRaw ? Number(minLengthRaw) : null;
+  const placeholder = ((formData.get("placeholder") as string | null) ?? "").trim();
+  const help = ((formData.get("help") as string | null) ?? "").trim();
+  const optionsRaw = ((formData.get("options") as string | null) ?? "").trim();
+  const options = optionsRaw
+    ? optionsRaw
+        .split(/[\n,]/)
+        .map((o) => o.trim())
+        .filter(Boolean)
+    : null;
+  if (!id) return;
+
+  await db
+    .update(postingFields)
+    .set({
+      label: label || "（無題）",
+      name: name || "field",
+      type,
+      required,
+      isName,
+      minLength:
+        minLength !== null && !Number.isNaN(minLength) ? minLength : null,
+      placeholder: placeholder || null,
+      help: help || null,
+      options,
+    })
+    .where(eq(postingFields.id, id));
+  if (postingId) revalidatePath(`/admin/postings/${postingId}`);
+}
+
+export async function deleteField(formData: FormData): Promise<void> {
+  await assertAdmin();
+  const id = formData.get("id") as string;
+  const postingId = formData.get("postingId") as string;
+  await db.delete(postingFields).where(eq(postingFields.id, id));
+  if (postingId) revalidatePath(`/admin/postings/${postingId}`);
+}
+
+export async function moveField(formData: FormData): Promise<void> {
+  await assertAdmin();
+  const id = formData.get("id") as string;
+  const postingId = formData.get("postingId") as string;
+  const dir = formData.get("dir") as string; // "up" | "down"
+  if (!id || !postingId) return;
+
+  const fields = await db
+    .select()
+    .from(postingFields)
+    .where(eq(postingFields.postingId, postingId))
+    .orderBy(asc(postingFields.sortOrder));
+  const idx = fields.findIndex((f) => f.id === id);
+  if (idx < 0) return;
+  const swapWith = dir === "up" ? idx - 1 : idx + 1;
+  if (swapWith < 0 || swapWith >= fields.length) return;
+
+  const a = fields[idx];
+  const b = fields[swapWith];
+  await db
+    .update(postingFields)
+    .set({ sortOrder: b.sortOrder })
+    .where(eq(postingFields.id, a.id));
+  await db
+    .update(postingFields)
+    .set({ sortOrder: a.sortOrder })
+    .where(eq(postingFields.id, b.id));
+  revalidatePath(`/admin/postings/${postingId}`);
+}
+
+function normalizeFieldName(s: string): string {
+  return s
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_]+/g, "_")
+    .replace(/^_+|_+$/g, "");
 }
 
 // --- ブロック/注意ワード ---

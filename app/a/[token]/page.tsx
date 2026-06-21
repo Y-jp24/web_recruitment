@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { CalendarClock, Clock, Info } from "lucide-react";
 import { getApplicationByToken } from "@/lib/applications";
-import { getPosting } from "@/lib/postings";
+import { getPostingBySlug } from "@/lib/postings-db";
 import { formatSlotRange } from "@/lib/datetime";
 import { Container, Card, Badge, SentenceLines } from "@/components/ui";
 
@@ -16,7 +16,7 @@ export default async function StatusPage({
   const app = await getApplicationByToken(token);
   if (!app) notFound();
 
-  const posting = getPosting(app.postingSlug);
+  const posting = await getPostingBySlug(app.postingSlug);
   const declined = app.status === "auto_rejected" || app.status === "rejected";
 
   return (

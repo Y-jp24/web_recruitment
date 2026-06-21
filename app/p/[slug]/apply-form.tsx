@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useId, useState } from "react";
+import { useActionState, useEffect, useId, useRef } from "react";
 import { CalendarClock, Loader2, AlertCircle } from "lucide-react";
 import type { Field } from "@/lib/postings";
 import { CLIENT_ID_FIELD } from "@/lib/auth";
@@ -106,10 +106,10 @@ export function ApplyForm({
     action,
     { ok: false },
   );
-  const [clientId, setClientId] = useState("");
+  const cidRef = useRef<HTMLInputElement>(null);
   const formId = useId();
 
-  // 応募者識別子を localStorage に保持（Cookie と相互補完）
+  // 応募者識別子を localStorage に保持し、hidden field に反映（Cookie と相互補完）
   useEffect(() => {
     let id = "";
     try {
@@ -124,14 +124,19 @@ export function ApplyForm({
     } catch {
       // localStorage 不可の環境では無視
     }
-    setClientId(id);
+    if (cidRef.current) cidRef.current.value = id;
   }, []);
 
   const errors = state.errors ?? {};
 
   return (
     <form action={formAction} className="flex flex-col gap-6">
-      <input type="hidden" name={CLIENT_ID_FIELD} value={clientId} />
+      <input
+        type="hidden"
+        name={CLIENT_ID_FIELD}
+        ref={cidRef}
+        defaultValue=""
+      />
 
       {state.formError && (
         <p className="flex items-center gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">

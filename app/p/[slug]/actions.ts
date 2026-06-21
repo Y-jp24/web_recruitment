@@ -2,7 +2,8 @@
 
 import { db } from "@/lib/db";
 import { applications } from "@/lib/db/schema";
-import { getPosting, pickDisplayName } from "@/lib/postings";
+import { pickDisplayName } from "@/lib/postings";
+import { getPostingBySlug } from "@/lib/postings-db";
 import { validateApplication } from "@/lib/validation";
 import { screenApplication, recordBlockedClient } from "@/lib/screening";
 import { getClientIp, getClientIdFromCookie } from "@/lib/request";
@@ -39,7 +40,7 @@ export async function submitApplication(
   _prev: ApplyState,
   formData: FormData,
 ): Promise<ApplyState> {
-  const posting = getPosting(slug);
+  const posting = await getPostingBySlug(slug);
   if (!posting || !posting.active) {
     return { ok: false, formError: "この募集は現在受け付けていません。" };
   }

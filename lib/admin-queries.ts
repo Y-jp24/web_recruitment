@@ -4,7 +4,6 @@ import {
   slots,
   blockTerms,
   blockedClients,
-  postingNotes,
   type Application,
   type Slot,
   type BlockTerm,
@@ -68,14 +67,6 @@ export async function listSlots(): Promise<SlotRow[]> {
         }
       : null,
   }));
-}
-
-/** 案件 slug ごとの管理者メモ */
-export async function getPostingNotes(): Promise<Record<string, string>> {
-  const rows = await db.select().from(postingNotes);
-  const map: Record<string, string> = {};
-  for (const r of rows) map[r.slug] = r.note;
-  return map;
 }
 
 export async function listBlockTerms(): Promise<BlockTerm[]> {
