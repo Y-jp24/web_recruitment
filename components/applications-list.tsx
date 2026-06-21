@@ -204,6 +204,28 @@ export function ApplicationsList({ apps }: { apps: AppView[] }) {
               </p>
             )}
 
+            {/* メモ */}
+            <form
+              action={saveNote}
+              className="mt-4 flex flex-col gap-2 border-t border-slate-100 pt-4"
+            >
+              <input type="hidden" name="id" value={selected.id} />
+              <label className="text-xs font-medium text-slate-500">メモ</label>
+              <textarea
+                name="note"
+                rows={2}
+                defaultValue={selected.note}
+                key={selected.id}
+                placeholder="この応募者についてのメモ"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
+              />
+              <SubmitButton
+                className={buttonClass("secondary", "sm", "self-start")}
+              >
+                メモを保存
+              </SubmitButton>
+            </form>
+
             {/* 回答 */}
             <dl className="mt-4 divide-y divide-slate-100 border-t border-slate-100 text-sm">
               {selected.answers.map((ans, i) => (
@@ -238,28 +260,6 @@ export function ApplicationsList({ apps }: { apps: AppView[] }) {
                 </span>
               )}
             </div>
-
-            {/* メモ */}
-            <form
-              action={saveNote}
-              className="mt-4 flex flex-col gap-2 border-t border-slate-100 pt-4"
-            >
-              <input type="hidden" name="id" value={selected.id} />
-              <label className="text-xs font-medium text-slate-500">メモ</label>
-              <textarea
-                name="note"
-                rows={2}
-                defaultValue={selected.note}
-                key={selected.id}
-                placeholder="この応募者についてのメモ"
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
-              />
-              <SubmitButton
-                className={buttonClass("secondary", "sm", "self-start")}
-              >
-                メモを保存
-              </SubmitButton>
-            </form>
 
             {/* 操作 */}
             <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-100 pt-4">
