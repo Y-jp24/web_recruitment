@@ -34,11 +34,8 @@ export default async function DonePage({
           <CheckCircle2 className="h-7 w-7 text-emerald-600" />
         </div>
         <h1 className="mt-5 text-xl font-bold text-slate-900">
-          ご応募ありがとうございました
+          面談のご予約を受け付けました
         </h1>
-        <p className="mt-2 text-sm leading-relaxed text-slate-600">
-          面談のご予約を受け付けました。
-        </p>
 
         {app.slot && (
           <div className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-700">
