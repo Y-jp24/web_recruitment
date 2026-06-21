@@ -30,6 +30,7 @@ function toPosting(p: PostingRow, fields: PostingFieldRow[]): Posting {
     active: p.active,
     intro: p.intro,
     note: p.note,
+    afterApplyMessage: p.afterApplyMessage,
     fields: fields
       .slice()
       .sort((a, b) => a.sortOrder - b.sortOrder)

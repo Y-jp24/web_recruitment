@@ -2,8 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CheckCircle2, CalendarClock, Link2 } from "lucide-react";
 import { getApplicationByToken, getOrigin } from "@/lib/applications";
+import { getPostingBySlug } from "@/lib/postings-db";
 import { formatSlotRange } from "@/lib/datetime";
 import { Container, Card, SentenceLines } from "@/components/ui";
+import { MeetingLink } from "@/components/meeting-link";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +22,10 @@ export default async function DonePage({
 
   const origin = await getOrigin();
   const statusUrl = `${origin}/a/${token}`;
+
+  // オンライン面談URLは却下扱いでない応募にのみ表示する（自動却下はサイレント）。
+  const posting = await getPostingBySlug(app.postingSlug);
+  const showMeeting = app.status === "new" && !!app.meetingUrl;
 
   return (
     <Container className="py-14">
@@ -43,6 +49,13 @@ export default async function DonePage({
               {formatSlotRange(app.slot.startAt, app.slot.endAt)}
             </span>
           </div>
+        )}
+
+        {showMeeting && (
+          <MeetingLink
+            url={app.meetingUrl!}
+            message={posting?.afterApplyMessage}
+          />
         )}
 
         <div className="mt-6 rounded-xl border border-slate-200 p-4 text-left">

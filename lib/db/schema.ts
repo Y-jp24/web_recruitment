@@ -38,6 +38,8 @@ export const applications = pgTable("applications", {
   displayName: text("display_name"),
   // 応募者向け専用URL /a/[token] の推測困難なトークン
   token: text("token").notNull().unique(),
+  // 応募時に自動発行するオンライン面談URL（Jitsi）。推測困難な部屋名を含む。
+  meetingUrl: text("meeting_url"),
   // 'new' | 'auto_rejected'（自動却下） | 'rejected'（手動却下）
   status: text("status").notNull().default("new"),
   // 自動却下の理由（一致したブロック語 / 該当 blocked_client）
@@ -107,6 +109,8 @@ export const postings = pgTable("postings", {
   active: boolean("active").notNull().default(true),
   intro: text("intro"),
   note: text("note"),
+  // 応募完了後の画面に表示する案内文（応募者向け。面談URLの使い方など）。
+  afterApplyMessage: text("after_apply_message"),
   sortOrder: integer("sort_order").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()

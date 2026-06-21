@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { getPostingRowsById } from "@/lib/postings-db";
 import { getOrigin } from "@/lib/applications";
-import { FIELD_TYPES } from "@/lib/postings";
+import { FIELD_TYPES, DEFAULT_AFTER_APPLY_MESSAGE } from "@/lib/postings";
 import type { PostingFieldRow } from "@/lib/db/schema";
 import { Card, buttonClass } from "@/components/ui";
 import { ConfirmSubmit } from "@/components/confirm-submit";
@@ -257,6 +257,21 @@ export default async function PostingEditor({
               placeholder="https://crowdworks.jp/public/jobs/xxxxxxx"
               className={inputClass}
             />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className={labelClass}>
+              応募完了後の案内文（応募者に表示。オンライン面談URLの上に表示されます）
+            </label>
+            <textarea
+              name="afterApplyMessage"
+              rows={3}
+              defaultValue={posting.afterApplyMessage ?? ""}
+              placeholder={DEFAULT_AFTER_APPLY_MESSAGE}
+              className={inputClass}
+            />
+            <p className="text-xs text-slate-400">
+              未入力の場合は既定の案内文が表示されます。
+            </p>
           </div>
           <div className="flex items-center justify-between">
             <SubmitButton className={buttonClass("primary", "md")}>

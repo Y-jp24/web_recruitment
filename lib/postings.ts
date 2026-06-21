@@ -44,8 +44,17 @@ export type Posting = {
   active: boolean;
   intro?: string | null;
   note?: string | null;
+  // 応募完了後の画面に表示する案内文（未設定時は DEFAULT_AFTER_APPLY_MESSAGE）
+  afterApplyMessage?: string | null;
   fields: Field[];
 };
+
+/**
+ * 応募完了後の画面に表示する案内文のデフォルト。
+ * 案件ごとに管理画面で上書きできる（postings.afterApplyMessage）。
+ */
+export const DEFAULT_AFTER_APPLY_MESSAGE =
+  "面談の時間になりましたら、下記のオンライン面談URLからご参加ください。カメラ・マイクのご準備をお願いします。";
 
 /**
  * 応募回答から一覧タイトル用の文字列を取り出す。

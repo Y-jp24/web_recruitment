@@ -4,6 +4,7 @@ import { getApplicationByToken } from "@/lib/applications";
 import { getPostingBySlug } from "@/lib/postings-db";
 import { formatSlotRange } from "@/lib/datetime";
 import { Container, Card, Badge, SentenceLines } from "@/components/ui";
+import { MeetingLink } from "@/components/meeting-link";
 
 export const dynamic = "force-dynamic";
 
@@ -56,6 +57,13 @@ export default async function StatusPage({
                   {formatSlotRange(app.slot.startAt, app.slot.endAt)}
                 </span>
               </div>
+            )}
+
+            {app.meetingUrl && (
+              <MeetingLink
+                url={app.meetingUrl}
+                message={posting?.afterApplyMessage}
+              />
             )}
           </div>
         )}

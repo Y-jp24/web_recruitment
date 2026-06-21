@@ -193,6 +193,9 @@ export async function updatePostingMeta(formData: FormData): Promise<void> {
   const active = formData.get("active") === "on";
   const intro = ((formData.get("intro") as string | null) ?? "").trim();
   const note = ((formData.get("note") as string | null) ?? "").trim();
+  const afterApplyMessage = (
+    (formData.get("afterApplyMessage") as string | null) ?? ""
+  ).trim();
   if (!id || !title || !slug) return;
   await db
     .update(postings)
@@ -202,6 +205,7 @@ export async function updatePostingMeta(formData: FormData): Promise<void> {
       active,
       intro: intro || null,
       note: note || null,
+      afterApplyMessage: afterApplyMessage || null,
     })
     .where(eq(postings.id, id));
   revalidatePath("/admin/postings");

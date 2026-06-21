@@ -11,6 +11,7 @@ import { CLIENT_ID_FIELD } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { nanoid } from "nanoid";
+import { generateMeetingUrl } from "@/lib/meeting";
 
 export type ApplyState = {
   ok: boolean;
@@ -65,6 +66,8 @@ export async function submitApplication(
 
   // 3) 受付（insert）。slotId は UNIQUE なので二重予約は失敗する。
   const token = nanoid(24);
+  // オンライン面談URLを応募ごとに自動発行する。
+  const meetingUrl = generateMeetingUrl();
   let appId: string;
   try {
     const inserted = await db
@@ -75,6 +78,7 @@ export async function submitApplication(
         answers,
         displayName: pickDisplayName(posting, answers),
         token,
+        meetingUrl,
         clientId,
         clientIp: ip,
       })

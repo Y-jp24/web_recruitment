@@ -8,6 +8,7 @@ import {
   ShieldX,
   ExternalLink,
   Search,
+  Video,
 } from "lucide-react";
 import { listApplications, type AppRow } from "@/lib/admin-queries";
 import { fallbackTitle, type Posting } from "@/lib/postings";
@@ -109,6 +110,17 @@ function ApplicationItem({
           <ExternalLink className="h-3 w-3" />
           応募者ページ
         </Link>
+        {app.meetingUrl && (
+          <a
+            href={app.meetingUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 hover:text-slate-600"
+          >
+            <Video className="h-3 w-3" />
+            面談ルーム
+          </a>
+        )}
         {app.clientIp && <span>IP: {app.clientIp}</span>}
       </div>
 
