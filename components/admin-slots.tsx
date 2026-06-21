@@ -29,18 +29,26 @@ export type AdminSlotData = {
   bookedLabel: string | null;
 };
 
-const HOURS = Array.from({ length: 18 }, (_, i) => i + 6); // 6:00〜23:00
+// 開始は 0〜23時、終了は 1〜24時（深夜帯も含めて隙間なく選べる）
+const START_HOURS = Array.from({ length: 24 }, (_, i) => i); // 0:00〜23:00
+const END_HOURS = Array.from({ length: 24 }, (_, i) => i + 1); // 1:00〜24:00
+
+function hhmm(h: number): string {
+  return `${String(h).padStart(2, "0")}:00`;
+}
 
 export function AdminSlots({
   slots,
   todayJst,
   addSlots,
   deleteSlot,
+  deleteSlotsForDay,
 }: {
   slots: AdminSlotData[];
   todayJst: string;
   addSlots: (formData: FormData) => Promise<void>;
   deleteSlot: (formData: FormData) => Promise<void>;
+  deleteSlotsForDay: (formData: FormData) => Promise<void>;
 }) {
   const byDate = useMemo(() => {
     const map = new Map<string, AdminSlotData[]>();
@@ -147,9 +155,23 @@ export function AdminSlots({
 
       {/* 選択日の枠 + 追加 */}
       <div className="flex-1">
-        <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800">
-          <CalendarClock className="h-4 w-4 text-accent-600" />
-          {formatDateKeyJa(selectedDate)}
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+            <CalendarClock className="h-4 w-4 text-accent-600" />
+            {formatDateKeyJa(selectedDate)}
+          </div>
+          {daySlots.length > 0 && (
+            <form action={deleteSlotsForDay}>
+              <input type="hidden" name="date" value={selectedDate} />
+              <ConfirmSubmit
+                message={`${formatDateKeyJa(selectedDate)} の枠を${daySlots.length}件すべて削除します。予約が入っている枠も削除され、予約は枠なしになります。よろしいですか？`}
+                className={buttonClass("dangerGhost", "sm")}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                この日の枠を一括削除
+              </ConfirmSubmit>
+            </form>
+          )}
         </div>
 
         {/* 一括追加フォーム */}
@@ -165,9 +187,9 @@ export function AdminSlots({
                 defaultValue="13:00"
                 className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
               >
-                {HOURS.map((h) => (
-                  <option key={h} value={`${String(h).padStart(2, "0")}:00`}>
-                    {String(h).padStart(2, "0")}:00
+                {START_HOURS.map((h) => (
+                  <option key={h} value={hhmm(h)}>
+                    {hhmm(h)}
                   </option>
                 ))}
               </select>
@@ -181,9 +203,9 @@ export function AdminSlots({
                 defaultValue="17:00"
                 className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
               >
-                {HOURS.map((h) => (
-                  <option key={h} value={`${String(h).padStart(2, "0")}:00`}>
-                    {String(h).padStart(2, "0")}:00
+                {END_HOURS.map((h) => (
+                  <option key={h} value={hhmm(h)}>
+                    {hhmm(h)}
                   </option>
                 ))}
               </select>

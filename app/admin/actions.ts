@@ -3,7 +3,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { and, eq, gte, inArray, asc, sql } from "drizzle-orm";
+import { and, eq, gte, lt, inArray, asc, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
   applications,
@@ -405,5 +405,18 @@ export async function deleteSlot(formData: FormData): Promise<void> {
   await assertAdmin();
   const id = formData.get("id") as string;
   await db.delete(slots).where(eq(slots.id, id));
+  revalidatePath("/admin/slots");
+}
+
+/** 指定した JST 日付の枠をすべて削除 */
+export async function deleteSlotsForDay(formData: FormData): Promise<void> {
+  await assertAdmin();
+  const date = (formData.get("date") as string | null) ?? "";
+  if (!date) return;
+  const dayStart = jstDateTimeToUTC(date, "00:00");
+  const dayEnd = jstDateTimeToUTC(date, "24:00"); // 翌日 0:00 JST
+  await db
+    .delete(slots)
+    .where(and(gte(slots.startAt, dayStart), lt(slots.startAt, dayEnd)));
   revalidatePath("/admin/slots");
 }

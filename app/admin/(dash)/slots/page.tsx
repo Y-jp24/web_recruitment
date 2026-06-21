@@ -2,7 +2,7 @@ import { listSlots } from "@/lib/admin-queries";
 import { getPostingsMap } from "@/lib/postings-db";
 import { formatTime, jstDateKey, todayJstKey } from "@/lib/datetime";
 import { AdminSlots, type AdminSlotData } from "@/components/admin-slots";
-import { addSlots, deleteSlot } from "../../actions";
+import { addSlots, deleteSlot, deleteSlotsForDay } from "../../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +34,7 @@ export default async function SlotsPage() {
         todayJst={todayJstKey()}
         addSlots={addSlots}
         deleteSlot={deleteSlot}
+        deleteSlotsForDay={deleteSlotsForDay}
       />
     </div>
   );
