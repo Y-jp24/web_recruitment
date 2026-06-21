@@ -39,6 +39,31 @@ export type AppView = {
   answers: AnswerView[];
 };
 
+// 回答テキスト内の URL を新しいタブで開くリンク（外部リンクアイコン付き）にする
+function Linkify({ text }: { text: string }) {
+  const parts = text.split(/(https?:\/\/[^\s]+)/g);
+  return (
+    <>
+      {parts.map((part, i) =>
+        /^https?:\/\//.test(part) ? (
+          <a
+            key={i}
+            href={part}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="inline-flex items-center gap-0.5 break-all text-accent-700 underline underline-offset-2 hover:text-accent-800"
+          >
+            {part}
+            <ExternalLink className="h-3 w-3 shrink-0" />
+          </a>
+        ) : (
+          <span key={i}>{part}</span>
+        ),
+      )}
+    </>
+  );
+}
+
 function statusBadge(status: string) {
   if (status === "auto_rejected")
     return <Badge variant="danger">自動却下</Badge>;
@@ -166,7 +191,7 @@ export function ApplicationsList({ apps }: { apps: AppView[] }) {
                     {ans.label}
                   </dt>
                   <dd className="mt-1 whitespace-pre-wrap break-words text-slate-900">
-                    {ans.value || "—"}
+                    {ans.value ? <Linkify text={ans.value} /> : "—"}
                   </dd>
                 </div>
               ))}
