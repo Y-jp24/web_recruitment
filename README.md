@@ -1,0 +1,108 @@
+# 採用応募 + 面談予約フォーム
+
+クラウドソーシング等での募集で、AI生成・使い回しの「適当な応募」を減らし、応募と同時に面談枠の予約まで完了させる、シンプルな自己ホスト型の応募フォームです。
+
+- **指定フォーマットでの応募**: 案件ごとに必須/任意・最低文字数つきの入力項目を定義できます。
+- **面談予約（TimeRex風）**: 応募と同時に、空き枠から面談希望日時を予約。二重予約は自動で防止します。
+- **募集案件ごとの専用URL**: `/p/<slug>` を応募者に送ります。フォーム項目は案件ごとに変えられます。
+- **応募者向けステータスURL**: 応募者ごとに `/a/<token>` を発行。選考状況をそこで確認してもらえます（個別連絡が不要）。
+- **サイレント・スクリーニング**: 登録したブロック/注意ワード（クラウドワークスのユーザー名・プロフィールURL等）に照合し、ブロック該当の応募は受付後に自動却下、注意は一覧で印を付けます。
+- **シンプルな管理画面**: パスワード1つ（環境変数）で利用。ログインは総当たり対策（IP単位のロックアウト）済み。
+
+技術構成: **Next.js (App Router) / Drizzle ORM / Neon (PostgreSQL) / Tailwind CSS / lucide-react**
+
+> ⚠️ スクリーニングはあくまで「利用者自身が集めた情報に基づく補助」です。応募者を門前払いせず、受付後に募集者の自動ルールで仕分けします。悪質ワーカー情報の取り扱い（特に第三者への共有）は名誉毀損・個人情報保護の観点に注意してください。本ツールは自己ホスト・個人利用を前提としています。
+
+---
+
+## セットアップ
+
+### 1. 取得とインストール
+
+```bash
+git clone <this-repo>
+cd web_recruitment
+npm install
+```
+
+### 2. データベース（Neon）
+
+1. [Neon](https://neon.tech) でプロジェクトを作成し、接続文字列（`postgresql://...`）を取得します。
+2. `.env` を用意します。
+
+```bash
+cp .env.example .env
+```
+
+`.env` を編集:
+
+```env
+DATABASE_URL="postgresql://USER:PASSWORD@HOST/DBNAME?sslmode=require"
+ADMIN_PASSWORD="（管理画面のログインパスワード。長く複雑なものを推奨）"
+SESSION_SECRET="（ランダムな長い文字列。例: openssl rand -base64 32）"
+```
+
+### 3. テーブル作成（マイグレーション）
+
+```bash
+npm run db:migrate
+```
+
+### 4. 起動
+
+```bash
+npm run dev
+```
+
+- 管理画面: <http://localhost:3000/admin>（`ADMIN_PASSWORD` でログイン）
+- 応募ページ: <http://localhost:3000/p/sample>（サンプル案件）
+
+---
+
+## 使い方
+
+1. **面談枠を登録**: 管理画面 → 「面談枠」で日付と時間帯（例 13:00〜17:00）をまとめて登録すると、1時間単位の枠が作られます。
+2. **募集案件を用意**: `lib/postings.ts` に案件（`slug`・タイトル・質問項目）を定義します。`slug` がそのまま公開URL `/p/<slug>` になります。
+3. **URLを応募者に送る**: 管理画面 → 「募集案件」で各案件のURLをコピーして送付します。
+4. **応募を確認**: 管理画面 → 「応募」で内容を確認。却下・メモ・応募元のブロックができます。
+5. **スパム対策**: 管理画面 → 「ブロックリスト」で、弾きたい/注意したいユーザー名・プロフィールURLを登録します。
+
+### 募集案件のカスタマイズ（`lib/postings.ts`）
+
+```ts
+export const postings: Posting[] = [
+  {
+    slug: "writer-2026",            // 公開URL: /p/writer-2026
+    title: "業務委託ライター募集",
+    active: true,                    // false で受付停止
+    intro: "以下のフォーマットでご記入ください。",
+    fields: [
+      { name: "full_name", label: "お名前", type: "text", required: true, isName: true },
+      { name: "experience", label: "職務経歴", type: "textarea", required: true, minLength: 200 },
+      // text / textarea / email / tel / select / radio / number
+      // required（必須/任意）, minLength（最低文字数）, options（選択肢）など
+    ],
+  },
+];
+```
+
+---
+
+## Vercel へのデプロイ
+
+1. このリポジトリを自分の GitHub に push します。
+2. [Vercel](https://vercel.com/new) で対象リポジトリをインポートします。
+3. 環境変数（`DATABASE_URL` / `ADMIN_PASSWORD` / `SESSION_SECRET`）を設定します。
+4. デプロイ後、テーブル未作成なら一度だけローカルから `DATABASE_URL` を本番DBに向けて `npm run db:migrate` を実行します。
+
+---
+
+## セキュリティ・運用上の注意
+
+- `ADMIN_PASSWORD` は十分に長く複雑なものにしてください（ログインは IP 単位でロックアウトしますが、強いパスワードが前提です）。
+- `.env`（および `CLAUDE.md` 等）は `.gitignore` 済みです。秘密情報をコミットしないでください。
+- 応募者識別（IP / Cookie / localStorage）は回避され得る補助的なもので、完全な防止策ではありません。
+
+## ライセンス
+
+[MIT](./LICENSE)
