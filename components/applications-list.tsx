@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   X,
   TriangleAlert,
@@ -21,6 +21,7 @@ import {
   unrejectApplication,
   deleteApplication,
   blockApplicationClient,
+  getIpLocation,
 } from "@/app/admin/actions";
 
 export type AnswerView = { label: string; value: string };
@@ -74,6 +75,26 @@ function statusBadge(status: string) {
 export function ApplicationsList({ apps }: { apps: AppView[] }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = apps.find((a) => a.id === selectedId) ?? null;
+
+  // IP の所在地（モーダルを開いたとき取得・IP ごとにキャッシュ）
+  const [ipLocations, setIpLocations] = useState<Record<string, string | null>>(
+    {},
+  );
+  const selectedIp = selected?.clientIp ?? null;
+  useEffect(() => {
+    if (!selectedIp || selectedIp in ipLocations) return;
+    let cancelled = false;
+    getIpLocation(selectedIp).then((loc) => {
+      if (!cancelled) {
+        setIpLocations((m) => ({ ...m, [selectedIp]: loc }));
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedIp, ipLocations]);
+
+  const ipLocation = selectedIp ? ipLocations[selectedIp] : undefined;
 
   return (
     <>
@@ -206,7 +227,16 @@ export function ApplicationsList({ apps }: { apps: AppView[] }) {
                 <ExternalLink className="h-3 w-3" />
                 応募者ページ
               </Link>
-              {selected.clientIp && <span>IP: {selected.clientIp}</span>}
+              {selected.clientIp && (
+                <span>
+                  IP: {selected.clientIp}
+                  {ipLocation === undefined
+                    ? "（所在地を取得中…）"
+                    : ipLocation
+                      ? `（${ipLocation}）`
+                      : "（所在地不明）"}
+                </span>
+              )}
             </div>
 
             {/* メモ */}

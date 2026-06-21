@@ -20,6 +20,7 @@ import {
 } from "@/lib/auth";
 import { assertAdmin } from "@/lib/auth-server";
 import { jstDateTimeToUTC } from "@/lib/datetime";
+import { fetchIpLocation } from "@/lib/ip-location";
 import { getClientIp } from "@/lib/request";
 import {
   checkLock,
@@ -125,6 +126,13 @@ export async function saveNote(formData: FormData): Promise<void> {
     .set({ note: note || null })
     .where(eq(applications.id, id));
   revalidatePath("/admin");
+}
+
+/** IP からおおよその所在地を取得（詳細モーダルで表示） */
+export async function getIpLocation(ip: string): Promise<string | null> {
+  await assertAdmin();
+  if (!ip) return null;
+  return fetchIpLocation(ip);
 }
 
 /** この応募元（clientId + IP）をブロックし、応募も却下する */
