@@ -28,7 +28,9 @@ import {
   throttleDelay,
 } from "@/lib/login-throttle";
 
-export type LoginState = { error?: string };
+// retryAfterSec が含まれる場合はロック中。クライアント側で残り時間の
+// カウントダウン表示とボタン無効化に使う。
+export type LoginState = { error?: string; retryAfterSec?: number };
 
 function lockMessage(retryAfterSec: number): string {
   const min = Math.ceil(retryAfterSec / 60);
@@ -45,7 +47,10 @@ export async function login(
   // 1) ロック中か確認
   const lock = await checkLock(ip);
   if (!lock.allowed) {
-    return { error: lockMessage(lock.retryAfterSec) };
+    return {
+      error: lockMessage(lock.retryAfterSec),
+      retryAfterSec: lock.retryAfterSec,
+    };
   }
 
   // 2) 照合（固定時間比較）。失敗時は遅延を挟む。
@@ -53,7 +58,10 @@ export async function login(
     await throttleDelay();
     const result = await registerFailure(ip);
     if (!result.allowed) {
-      return { error: lockMessage(result.retryAfterSec) };
+      return {
+        error: lockMessage(result.retryAfterSec),
+        retryAfterSec: result.retryAfterSec,
+      };
     }
     return { error: "パスワードが正しくありません。" };
   }
