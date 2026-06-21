@@ -54,7 +54,7 @@ export type Posting = {
  * 案件ごとに管理画面で上書きできる（postings.afterApplyMessage）。
  */
 export const DEFAULT_AFTER_APPLY_MESSAGE =
-  "面談の時間になりましたら、下記のオンライン面談URLからご参加ください。カメラ・マイクのご準備をお願いします。";
+  "面談の時間になりましたら、下記のオンライン面談URLからご参加ください。";
 
 /**
  * 応募回答から一覧タイトル用の文字列を取り出す。

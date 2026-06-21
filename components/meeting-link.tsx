@@ -7,7 +7,6 @@
  */
 
 import { Video } from "lucide-react";
-import { SentenceLines } from "@/components/ui";
 import { DEFAULT_AFTER_APPLY_MESSAGE } from "@/lib/postings";
 
 export function MeetingLink({
@@ -26,10 +25,9 @@ export function MeetingLink({
         <Video className="h-4 w-4 text-accent-600" />
         オンライン面談
       </div>
-      <SentenceLines
-        text={text}
-        className="mt-1.5 text-xs leading-relaxed text-slate-600"
-      />
+      <p className="mt-1.5 whitespace-pre-line text-xs leading-relaxed text-slate-600">
+        {text}
+      </p>
       <a
         href={url}
         target="_blank"

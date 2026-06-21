@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { getPostingBySlug } from "@/lib/postings-db";
 import { getAvailableSlots } from "@/lib/slots";
 import { formatTime, jstDateKey, todayJstKey } from "@/lib/datetime";
-import { Container, Card, SentenceLines } from "@/components/ui";
+import { Container, Card } from "@/components/ui";
 import { ApplyForm } from "./apply-form";
 import { submitApplication } from "./actions";
 
@@ -49,10 +49,9 @@ export default async function ApplyPage({
           {posting.title}
         </h1>
         {posting.intro && (
-          <SentenceLines
-            text={posting.intro}
-            className="mt-3 text-sm leading-relaxed text-slate-600"
-          />
+          <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-slate-600">
+            {posting.intro}
+          </p>
         )}
       </div>
 
