@@ -5,6 +5,7 @@ import { countByPosting } from "@/lib/admin-queries";
 import { getOrigin } from "@/lib/applications";
 import { Card, Badge, buttonClass } from "@/components/ui";
 import { CopyButton } from "@/components/copy-button";
+import { SubmitButton } from "@/components/submit-button";
 import { createPosting } from "../../actions";
 
 export const dynamic = "force-dynamic";
@@ -63,10 +64,10 @@ export default async function PostingsPage({
               className="w-44 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
             />
           </div>
-          <button className={buttonClass("primary", "md")}>
+          <SubmitButton className={buttonClass("primary", "md")}>
             <Plus className="h-4 w-4" />
             作成して編集
-          </button>
+          </SubmitButton>
         </form>
       </Card>
 

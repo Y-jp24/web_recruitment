@@ -15,6 +15,7 @@ import { FIELD_TYPES } from "@/lib/postings";
 import type { PostingFieldRow } from "@/lib/db/schema";
 import { Card, buttonClass } from "@/components/ui";
 import { ConfirmSubmit } from "@/components/confirm-submit";
+import { SubmitButton } from "@/components/submit-button";
 import {
   updatePostingMeta,
   deletePosting,
@@ -47,23 +48,23 @@ function FieldEditor({ field }: { field: PostingFieldRow }) {
             <input type="hidden" name="id" value={field.id} />
             <input type="hidden" name="postingId" value={postingId} />
             <input type="hidden" name="dir" value="up" />
-            <button
+            <SubmitButton
               aria-label="上へ"
               className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"
             >
               <ChevronUp className="h-4 w-4" />
-            </button>
+            </SubmitButton>
           </form>
           <form action={moveField}>
             <input type="hidden" name="id" value={field.id} />
             <input type="hidden" name="postingId" value={postingId} />
             <input type="hidden" name="dir" value="down" />
-            <button
+            <SubmitButton
               aria-label="下へ"
               className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"
             >
               <ChevronDown className="h-4 w-4" />
-            </button>
+            </SubmitButton>
           </form>
           <form action={deleteField}>
             <input type="hidden" name="id" value={field.id} />
@@ -167,9 +168,9 @@ function FieldEditor({ field }: { field: PostingFieldRow }) {
             />
             一覧のタイトルとして使う
           </label>
-          <button className={buttonClass("secondary", "sm", "ml-auto")}>
+          <SubmitButton className={buttonClass("secondary", "sm", "ml-auto")}>
             保存
-          </button>
+          </SubmitButton>
         </div>
       </form>
     </Card>
@@ -258,7 +259,9 @@ export default async function PostingEditor({
             />
           </div>
           <div className="flex items-center justify-between">
-            <button className={buttonClass("primary", "md")}>保存</button>
+            <SubmitButton className={buttonClass("primary", "md")}>
+              保存
+            </SubmitButton>
           </div>
         </form>
       </Card>
@@ -269,10 +272,10 @@ export default async function PostingEditor({
           <h2 className="text-lg font-bold text-slate-900">入力項目</h2>
           <form action={addField}>
             <input type="hidden" name="postingId" value={posting.id} />
-            <button className={buttonClass("secondary", "sm")}>
+            <SubmitButton className={buttonClass("secondary", "sm")}>
               <Plus className="h-4 w-4" />
               項目を追加
-            </button>
+            </SubmitButton>
           </form>
         </div>
         {fields.length === 0 ? (

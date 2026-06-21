@@ -3,6 +3,7 @@ import { listBlockTerms, listBlockedClients } from "@/lib/admin-queries";
 import { formatDate, formatTime } from "@/lib/datetime";
 import { Card, Badge, buttonClass } from "@/components/ui";
 import { ConfirmSubmit } from "@/components/confirm-submit";
+import { SubmitButton } from "@/components/submit-button";
 import { addBlockTerm, deleteBlockTerm, unblockClient } from "../../actions";
 
 export const dynamic = "force-dynamic";
@@ -50,10 +51,10 @@ export default async function BlocklistPage() {
                 <option value="warn">注意（印を付ける）</option>
               </select>
             </div>
-            <button className={buttonClass("primary", "md")}>
+            <SubmitButton className={buttonClass("primary", "md")}>
               <Plus className="h-4 w-4" />
               追加
-            </button>
+            </SubmitButton>
           </form>
         </Card>
 

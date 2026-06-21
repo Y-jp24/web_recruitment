@@ -15,6 +15,7 @@ import { getPostingsMap, listPostingRows } from "@/lib/postings-db";
 import { formatSlotRange, formatDate, formatTime } from "@/lib/datetime";
 import { Card, Badge, buttonClass } from "@/components/ui";
 import { ConfirmSubmit } from "@/components/confirm-submit";
+import { SubmitButton } from "@/components/submit-button";
 import {
   rejectApplication,
   unrejectApplication,
@@ -125,12 +126,11 @@ function ApplicationItem({
           placeholder="この応募者についてのメモ"
           className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
         />
-        <button
-          type="submit"
+        <SubmitButton
           className={buttonClass("secondary", "sm", "self-start")}
         >
           メモを保存
-        </button>
+        </SubmitButton>
       </form>
 
       {/* 操作 */}
@@ -138,10 +138,10 @@ function ApplicationItem({
         {rejected ? (
           <form action={unrejectApplication}>
             {idField}
-            <button className={buttonClass("secondary", "sm")}>
+            <SubmitButton className={buttonClass("secondary", "sm")}>
               <RotateCcw className="h-3.5 w-3.5" />
               却下を取り消す
-            </button>
+            </SubmitButton>
           </form>
         ) : (
           <form action={rejectApplication}>

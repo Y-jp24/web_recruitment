@@ -3,15 +3,15 @@
 import { useFormStatus } from "react-dom";
 import { Loader2 } from "lucide-react";
 
-export function ConfirmSubmit({
-  message,
+/**
+ * Server Action フォーム用の送信ボタン。
+ * 送信中はスピナー表示＋無効化してクリック後の反応を見せる。
+ */
+export function SubmitButton({
   className,
   children,
-}: {
-  message: string;
-  className?: string;
-  children: React.ReactNode;
-}) {
+  ...rest
+}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const { pending } = useFormStatus();
   return (
     <button
@@ -19,9 +19,7 @@ export function ConfirmSubmit({
       disabled={pending}
       aria-busy={pending}
       className={className}
-      onClick={(e) => {
-        if (!confirm(message)) e.preventDefault();
-      }}
+      {...rest}
     >
       {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : children}
     </button>

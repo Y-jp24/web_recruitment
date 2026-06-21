@@ -19,6 +19,7 @@ import { formatDateKeyJa } from "@/lib/datetime";
 import { cn } from "@/lib/utils";
 import { Card, Badge, buttonClass } from "@/components/ui";
 import { ConfirmSubmit } from "@/components/confirm-submit";
+import { SubmitButton } from "@/components/submit-button";
 
 export type AdminSlotData = {
   id: string;
@@ -210,10 +211,10 @@ export function AdminSlots({
                 ))}
               </select>
             </div>
-            <button className={buttonClass("primary", "md")}>
+            <SubmitButton className={buttonClass("primary", "md")}>
               <Plus className="h-4 w-4" />
               この日に枠を追加
-            </button>
+            </SubmitButton>
           </form>
           <p className="mt-2 text-xs text-slate-400">
             1時間単位の枠に分割して追加されます（日本時間）。
