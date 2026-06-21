@@ -224,9 +224,6 @@ export function ApplyForm({
           "この内容で送信する"
         )}
       </button>
-      <p className="text-center text-xs text-slate-400">
-        ＊ は必須項目です。
-      </p>
     </form>
   );
 }
