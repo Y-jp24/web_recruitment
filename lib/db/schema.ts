@@ -7,6 +7,7 @@ import {
   integer,
   boolean,
 } from "drizzle-orm/pg-core";
+import { APPLICATION_STATUS_VALUES } from "@/lib/constants";
 
 /**
  * 面談枠（全案件共通の単一プール）。1枠 = 1時間。
@@ -40,8 +41,11 @@ export const applications = pgTable("applications", {
   token: text("token").notNull().unique(),
   // 応募時に自動発行するオンライン面談URL（Jitsi）。推測困難な部屋名を含む。
   meetingUrl: text("meeting_url"),
-  // 'new' | 'auto_rejected'（自動却下） | 'rejected'（手動却下）
-  status: text("status").notNull().default("new"),
+  // 応募（＝予約）の状態。値は lib/constants.ts の APPLICATION_STATUS を参照。
+  // new（予約中） | auto_rejected（自動却下） | rejected（手動却下） | cancelled（本人キャンセル）
+  status: text("status", { enum: APPLICATION_STATUS_VALUES })
+    .notNull()
+    .default("new"),
   // 自動却下の理由（一致したブロック語 / 該当 blocked_client）
   autoReason: text("auto_reason"),
   // 管理者の自由メモ
@@ -147,6 +151,19 @@ export const postingNotes = pgTable("posting_notes", {
     .defaultNow(),
 });
 
+/**
+ * アプリ全体の設定（シングルテナント）。key-value 形式で柔軟に項目を追加できる。
+ * 例: 予約確認ページのキャンセル/日程変更ボタンの表示可否。
+ * key は lib/constants.ts の SETTING_KEYS を参照。
+ */
+export const appSettings = pgTable("app_settings", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 export type PostingRow = typeof postings.$inferSelect;
 export type PostingFieldRow = typeof postingFields.$inferSelect;
 
@@ -154,3 +171,4 @@ export type Application = typeof applications.$inferSelect;
 export type Slot = typeof slots.$inferSelect;
 export type BlockTerm = typeof blockTerms.$inferSelect;
 export type BlockedClient = typeof blockedClients.$inferSelect;
+export type AppSetting = typeof appSettings.$inferSelect;

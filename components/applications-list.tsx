@@ -15,6 +15,7 @@ import Link from "next/link";
 import { Badge, buttonClass } from "@/components/ui";
 import { ConfirmSubmit } from "@/components/confirm-submit";
 import { SubmitButton } from "@/components/submit-button";
+import { APPLICATION_STATUS } from "@/lib/constants";
 import {
   saveNote,
   rejectApplication,
@@ -66,9 +67,12 @@ function Linkify({ text }: { text: string }) {
 }
 
 function statusBadge(status: string) {
-  if (status === "auto_rejected")
+  if (status === APPLICATION_STATUS.AUTO_REJECTED)
     return <Badge variant="danger">自動却下</Badge>;
-  if (status === "rejected") return <Badge variant="neutral">却下</Badge>;
+  if (status === APPLICATION_STATUS.REJECTED)
+    return <Badge variant="neutral">却下</Badge>;
+  if (status === APPLICATION_STATUS.CANCELLED)
+    return <Badge variant="neutral">キャンセル</Badge>;
   return <Badge variant="accent">新規</Badge>;
 }
 

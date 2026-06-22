@@ -6,14 +6,16 @@ import { fallbackTitle } from "@/lib/postings";
 import { formatDate, formatTime, formatSlotRange } from "@/lib/datetime";
 import { buttonClass } from "@/components/ui";
 import { ApplicationsList, type AppView } from "@/components/applications-list";
+import { APPLICATION_STATUS } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
 const STATUS_TABS = [
   { key: "", label: "すべて" },
-  { key: "new", label: "新規" },
-  { key: "auto_rejected", label: "自動却下" },
-  { key: "rejected", label: "却下" },
+  { key: APPLICATION_STATUS.NEW, label: "新規" },
+  { key: APPLICATION_STATUS.AUTO_REJECTED, label: "自動却下" },
+  { key: APPLICATION_STATUS.REJECTED, label: "却下" },
+  { key: APPLICATION_STATUS.CANCELLED, label: "キャンセル" },
 ];
 
 export default async function AdminApplicationsPage({

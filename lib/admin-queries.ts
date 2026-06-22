@@ -10,6 +10,7 @@ import {
   type BlockedClient,
 } from "@/lib/db/schema";
 import { and, desc, eq, asc, or, ilike, sql } from "drizzle-orm";
+import type { ApplicationStatus } from "@/lib/constants";
 
 export type AppRow = Application & { slot: Slot | null };
 
@@ -20,7 +21,9 @@ export async function listApplications(filter: {
 }): Promise<AppRow[]> {
   const conds = [];
   if (filter.posting) conds.push(eq(applications.postingSlug, filter.posting));
-  if (filter.status) conds.push(eq(applications.status, filter.status));
+  // status はクエリ文字列由来。enum 化した列に合わせて型を合わせる。
+  if (filter.status)
+    conds.push(eq(applications.status, filter.status as ApplicationStatus));
   if (filter.q) {
     const like = `%${filter.q}%`;
     // メモ・タイトル・回答全文（JSONB）・自動却下理由を横断検索

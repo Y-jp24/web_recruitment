@@ -19,6 +19,7 @@ import {
   expectedSessionToken,
 } from "@/lib/auth";
 import { assertAdmin } from "@/lib/auth-server";
+import { saveSettings } from "@/lib/settings";
 import { jstDateTimeToUTC } from "@/lib/datetime";
 import { fetchIpLocation } from "@/lib/ip-location";
 import { getClientIp } from "@/lib/request";
@@ -444,4 +445,27 @@ export async function deleteSlotsForDay(formData: FormData): Promise<void> {
     .delete(slots)
     .where(and(gte(slots.startAt, dayStart), lt(slots.startAt, dayEnd)));
   revalidatePath("/admin/slots");
+}
+
+// --- 設定 ---
+
+export type SettingsSaveState = { savedAt: number };
+
+/** アプリ設定の保存（useActionState 用。保存時刻を返してUIにフィードバックする） */
+export async function updateSettings(
+  _prev: SettingsSaveState,
+  formData: FormData,
+): Promise<SettingsSaveState> {
+  await assertAdmin();
+  // チェックボックスは on/未送信。明示的に真偽へ変換する。
+  const reservationCancelEnabled =
+    formData.get("reservationCancelEnabled") === "on";
+  const reservationRescheduleEnabled =
+    formData.get("reservationRescheduleEnabled") === "on";
+  await saveSettings({
+    reservationCancelEnabled,
+    reservationRescheduleEnabled,
+  });
+  revalidatePath("/admin/settings");
+  return { savedAt: Date.now() };
 }

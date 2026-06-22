@@ -105,11 +105,14 @@ export function ApplyForm({
   slots,
   todayJst,
   action,
+  initialValues,
 }: {
   fields: Field[];
   slots: SlotData[];
   todayJst: string;
   action: (prev: ApplyState, formData: FormData) => Promise<ApplyState>;
+  // 日程変更時に旧入力をフォームへ初期表示するための値（任意）
+  initialValues?: Record<string, string>;
 }) {
   const [state, formAction, isPending] = useActionState<ApplyState, FormData>(
     action,
@@ -137,7 +140,8 @@ export function ApplyForm({
   }, []);
 
   const errors = state.errors ?? {};
-  const values = state.values ?? {};
+  // 送信エラー時の復元値を優先し、無ければ日程変更の旧入力で初期化する
+  const values = { ...(initialValues ?? {}), ...(state.values ?? {}) };
 
   return (
     <form action={formAction} className="flex flex-col gap-6">

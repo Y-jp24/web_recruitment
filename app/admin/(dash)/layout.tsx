@@ -1,5 +1,12 @@
 import Link from "next/link";
-import { Inbox, Megaphone, CalendarClock, ShieldBan, LogOut } from "lucide-react";
+import {
+  Inbox,
+  Megaphone,
+  CalendarClock,
+  ShieldBan,
+  Settings,
+  LogOut,
+} from "lucide-react";
 import { logout } from "../actions";
 
 const nav = [
@@ -7,6 +14,7 @@ const nav = [
   { href: "/admin/postings", label: "募集案件", icon: Megaphone },
   { href: "/admin/slots", label: "面談枠", icon: CalendarClock },
   { href: "/admin/blocklist", label: "ブロックリスト", icon: ShieldBan },
+  { href: "/admin/settings", label: "設定", icon: Settings },
 ];
 
 export default function DashLayout({
