@@ -38,6 +38,9 @@ export type AppView = {
   clientIp: string | null;
   createdLabel: string;
   slotLabel: string | null;
+  // 一覧テーブル用の短い面談日時ラベル（カレンダー日別表示など、日付が自明な場面で時刻だけ表示する）。
+  // 未指定なら slotLabel を使う。
+  slotTimeLabel?: string | null;
   answers: AnswerView[];
 };
 
@@ -144,7 +147,7 @@ export function ApplicationsList({ apps }: { apps: AppView[] }) {
                   {a.postingTitle}
                 </td>
                 <td className="hidden px-4 py-3 text-slate-600 md:table-cell">
-                  {a.slotLabel ?? "—"}
+                  {a.slotTimeLabel ?? a.slotLabel ?? "—"}
                 </td>
                 <td className="px-4 py-3">{statusBadge(a.status)}</td>
                 <td className="hidden px-4 py-3 text-xs text-slate-400 sm:table-cell">
