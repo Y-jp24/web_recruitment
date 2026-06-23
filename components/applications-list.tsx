@@ -5,6 +5,7 @@ import {
   X,
   TriangleAlert,
   CalendarClock,
+  Video,
   Ban,
   RotateCcw,
   ShieldX,
@@ -15,6 +16,7 @@ import Link from "next/link";
 import { Badge, buttonClass } from "@/components/ui";
 import { ConfirmSubmit } from "@/components/confirm-submit";
 import { SubmitButton } from "@/components/submit-button";
+import { CopyButton } from "@/components/copy-button";
 import { APPLICATION_STATUS } from "@/lib/constants";
 import {
   saveNote,
@@ -41,6 +43,8 @@ export type AppView = {
   // 一覧テーブル用の短い面談日時ラベル（カレンダー日別表示など、日付が自明な場面で時刻だけ表示する）。
   // 未指定なら slotLabel を使う。
   slotTimeLabel?: string | null;
+  // 発行済みのオンライン面談URL（Jitsi）
+  meetingUrl: string | null;
   answers: AnswerView[];
 };
 
@@ -202,6 +206,27 @@ export function ApplicationsList({ apps }: { apps: AppView[] }) {
               <div className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs text-slate-700">
                 <CalendarClock className="h-3.5 w-3.5 text-accent-600" />
                 {selected.slotLabel}
+              </div>
+            )}
+
+            {/* 発行済みのオンライン面談URL */}
+            {selected.meetingUrl && (
+              <div className="mt-3">
+                <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                  <Video className="h-3.5 w-3.5 text-accent-600" />
+                  通話URL
+                </div>
+                <div className="mt-1.5 flex items-stretch gap-2">
+                  <a
+                    href={selected.meetingUrl}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="flex min-w-0 flex-1 items-center break-all rounded-lg bg-slate-50 px-3 py-2 font-mono text-xs text-accent-700 hover:bg-slate-100"
+                  >
+                    {selected.meetingUrl}
+                  </a>
+                  <CopyButton value={selected.meetingUrl} iconOnly />
+                </div>
               </div>
             )}
 

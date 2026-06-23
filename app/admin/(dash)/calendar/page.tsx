@@ -42,6 +42,7 @@ export default async function CalendarPage() {
       // モーダルではフル表示、一覧テーブルでは日付が自明なので時刻だけ表示する
       slotLabel: formatSlotRange(app.slot.startAt, app.slot.endAt),
       slotTimeLabel: `${formatTime(app.slot.startAt)}〜${formatTime(app.slot.endAt)}`,
+      meetingUrl: app.meetingUrl ?? null,
       answers: (p?.fields ?? []).map((f) => ({
         label: f.label,
         value: app.answers[f.name] || "",

@@ -52,6 +52,7 @@ export default async function AdminApplicationsPage({
       slotLabel: app.slot
         ? formatSlotRange(app.slot.startAt, app.slot.endAt)
         : null,
+      meetingUrl: app.meetingUrl ?? null,
       answers: (p?.fields ?? []).map((f) => ({
         label: f.label,
         value: app.answers[f.name] || "",
