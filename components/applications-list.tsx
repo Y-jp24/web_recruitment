@@ -220,11 +220,11 @@ export function ApplicationsList({ apps }: { apps: AppView[] }) {
               <label className="text-xs font-medium text-slate-500">メモ</label>
               <textarea
                 name="note"
-                rows={2}
+                rows={5}
                 defaultValue={selected.note}
                 key={selected.id}
                 placeholder="この応募者についてのメモ"
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
+                className="w-full resize-y rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"
               />
               <SubmitButton
                 className={buttonClass("secondary", "sm", "self-start")}
