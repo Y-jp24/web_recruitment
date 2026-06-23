@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { applications, slots, type Application, type Slot } from "@/lib/db/schema";
-import { and, eq, inArray, or } from "drizzle-orm";
+import { and, desc, eq, inArray, ne, or } from "drizzle-orm";
 import { headers } from "next/headers";
 import {
   APPLICATION_STATUS,
@@ -8,6 +8,42 @@ import {
 } from "@/lib/constants";
 
 export type ApplicationWithSlot = Application & { slot: Slot | null };
+
+/**
+ * 応募ページを開いた訪問者（Cookie の clientId で特定）が、その募集に
+ * 既に応募済みなら、案内ページ /a/[token] へ飛ばすためのトークンを返す。
+ * - 有効な予約（new）があればそれを優先
+ * - 無ければ却下系など直近の応募を返す
+ * - キャンセル済みのみの場合は null（再予約のためフォームを表示する）
+ */
+export async function findVisitorApplicationToken(
+  slug: string,
+  clientId: string | null,
+): Promise<string | null> {
+  if (!clientId) return null;
+
+  const rows = await db
+    .select({
+      token: applications.token,
+      status: applications.status,
+    })
+    .from(applications)
+    .where(
+      and(
+        eq(applications.postingSlug, slug),
+        eq(applications.clientId, clientId),
+        // キャンセル済みは対象外（再予約できるようフォームを見せる）
+        ne(applications.status, APPLICATION_STATUS.CANCELLED),
+      ),
+    )
+    .orderBy(desc(applications.createdAt));
+
+  if (rows.length === 0) return null;
+
+  // 有効な予約（new）を最優先、無ければ直近（createdAt 降順の先頭）
+  const active = rows.find((r) => r.status === APPLICATION_STATUS.NEW);
+  return (active ?? rows[0]).token;
+}
 
 /**
  * 同一人物による重複応募・再応募のブロック判定結果。

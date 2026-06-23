@@ -8,15 +8,19 @@ import { validateApplication } from "@/lib/validation";
 import { screenApplication, recordBlockedClient } from "@/lib/screening";
 import { findBlockingApplication } from "@/lib/applications";
 import { getClientIp, getClientIdFromCookie } from "@/lib/request";
-import { CLIENT_ID_FIELD } from "@/lib/auth";
+import { CLIENT_ID_FIELD, CLIENT_ID_COOKIE } from "@/lib/auth";
 import { APPLICATION_STATUS } from "@/lib/constants";
 import { eq } from "drizzle-orm";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { nanoid } from "nanoid";
 import { generateMeetingUrl } from "@/lib/meeting";
 
 // 却下済みの応募元が再応募してきた場合に、サイレントで自動却下する際の理由。
 const DUPLICATE_REJECT_REASON = "重複応募（却下済みの応募元）";
+
+// 応募者識別 Cookie（rcid）の有効期間（秒）。1年。
+const CLIENT_ID_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 
 export type ApplyState = {
   ok: boolean;
@@ -70,6 +74,19 @@ export async function submitApplication(
   const formCid = (formData.get(CLIENT_ID_FIELD) as string | null) || null;
   const clientId = cookieCid || formCid;
   const ip = await getClientIp();
+
+  // 応募者識別子を Cookie にも保存する。これにより次回フォームを開いたとき、
+  // サーバー側で本人を判定して案内ページ（/a/[token]）へ誘導できる。
+  if (clientId && !cookieCid) {
+    const c = await cookies();
+    c.set(CLIENT_ID_COOKIE, clientId, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: CLIENT_ID_COOKIE_MAX_AGE,
+    });
+  }
 
   // 3) 重複応募・再応募のチェック（同一人物 = clientId もしくは IP 一致で判定）
   const blocking = await findBlockingApplication(slug, clientId, ip);

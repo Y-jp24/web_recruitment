@@ -1,6 +1,10 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getPostingBySlug } from "@/lib/postings-db";
-import { getApplicationByToken } from "@/lib/applications";
+import {
+  getApplicationByToken,
+  findVisitorApplicationToken,
+} from "@/lib/applications";
+import { getClientIdFromCookie } from "@/lib/request";
 import { getAvailableSlots } from "@/lib/slots";
 import { formatTime, jstDateKey, todayJstKey } from "@/lib/datetime";
 import { RESCHEDULE_FROM_PARAM } from "@/lib/constants";
@@ -20,6 +24,13 @@ export default async function ApplyPage({
   const { slug } = await params;
   const posting = await getPostingBySlug(slug);
   if (!posting) notFound();
+
+  // 応募済みのブラウザ（Cookie の clientId で判定）なら、フォームではなく
+  // 応募後に案内した確認ページ（/a/[token]）を表示する。
+  // キャンセル済みのみの場合は対象外なので、通常どおり再予約フォームを見せる。
+  const visitorClientId = await getClientIdFromCookie();
+  const existingToken = await findVisitorApplicationToken(slug, visitorClientId);
+  if (existingToken) redirect(`/a/${existingToken}`);
 
   if (!posting.active) {
     return (
