@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   Inbox,
+  CalendarDays,
   Megaphone,
   CalendarClock,
   ShieldBan,
@@ -11,6 +12,7 @@ import { logout } from "../actions";
 
 const nav = [
   { href: "/admin", label: "応募", icon: Inbox },
+  { href: "/admin/calendar", label: "カレンダー", icon: CalendarDays },
   { href: "/admin/postings", label: "募集案件", icon: Megaphone },
   { href: "/admin/slots", label: "面談枠", icon: CalendarClock },
   { href: "/admin/blocklist", label: "ブロックリスト", icon: ShieldBan },

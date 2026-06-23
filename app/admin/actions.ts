@@ -91,6 +91,12 @@ export async function logout(): Promise<void> {
 
 // --- 応募の操作 ---
 
+// 応募データを変更したとき、応募一覧とカレンダーの両方を再検証する。
+function revalidateApplicationViews(): void {
+  revalidatePath("/admin");
+  revalidatePath("/admin/calendar");
+}
+
 export async function rejectApplication(formData: FormData): Promise<void> {
   await assertAdmin();
   const id = formData.get("id") as string;
@@ -98,7 +104,7 @@ export async function rejectApplication(formData: FormData): Promise<void> {
     .update(applications)
     .set({ status: "rejected", slotId: null })
     .where(eq(applications.id, id));
-  revalidatePath("/admin");
+  revalidateApplicationViews();
 }
 
 export async function unrejectApplication(formData: FormData): Promise<void> {
@@ -108,14 +114,14 @@ export async function unrejectApplication(formData: FormData): Promise<void> {
     .update(applications)
     .set({ status: "new", autoReason: null })
     .where(eq(applications.id, id));
-  revalidatePath("/admin");
+  revalidateApplicationViews();
 }
 
 export async function deleteApplication(formData: FormData): Promise<void> {
   await assertAdmin();
   const id = formData.get("id") as string;
   await db.delete(applications).where(eq(applications.id, id));
-  revalidatePath("/admin");
+  revalidateApplicationViews();
 }
 
 export async function saveNote(formData: FormData): Promise<void> {
@@ -126,7 +132,7 @@ export async function saveNote(formData: FormData): Promise<void> {
     .update(applications)
     .set({ note: note || null })
     .where(eq(applications.id, id));
-  revalidatePath("/admin");
+  revalidateApplicationViews();
 }
 
 /** IP からおおよその所在地を取得（詳細モーダルで表示） */
@@ -164,7 +170,7 @@ export async function blockApplicationClient(
     .update(applications)
     .set({ status: "rejected", slotId: null })
     .where(eq(applications.id, id));
-  revalidatePath("/admin");
+  revalidateApplicationViews();
 }
 
 // --- 募集案件（フォームビルダー） ---

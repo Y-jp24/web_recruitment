@@ -10,9 +10,27 @@ import {
   type BlockedClient,
 } from "@/lib/db/schema";
 import { and, desc, eq, asc, or, ilike, sql } from "drizzle-orm";
-import type { ApplicationStatus } from "@/lib/constants";
+import { APPLICATION_STATUS, type ApplicationStatus } from "@/lib/constants";
 
 export type AppRow = Application & { slot: Slot | null };
+
+// 面談予約あり（slot 付き）の応募。slot は必ず存在する。
+export type BookedAppRow = Application & { slot: Slot };
+
+/**
+ * 面談予約が入っている応募（有効な予約 = status new）を、面談日時の昇順で返す。
+ * カレンダー表示用。却下・キャンセル済みは slotId が null のため対象外になる。
+ */
+export async function listBookedApplications(): Promise<BookedAppRow[]> {
+  const rows = await db
+    .select()
+    .from(applications)
+    .innerJoin(slots, eq(applications.slotId, slots.id))
+    .where(eq(applications.status, APPLICATION_STATUS.NEW))
+    .orderBy(asc(slots.startAt));
+
+  return rows.map((r) => ({ ...r.applications, slot: r.slots }));
+}
 
 export async function listApplications(filter: {
   posting?: string;
